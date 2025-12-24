@@ -23,7 +23,7 @@ export default function Register() {
     setLoading(true);
 
     try {
-      await axios.post("https://task-team-management-system-1.onrender.com/api/register", formData);
+      await axios.post("/api/register", formData);
       navigate("/", { replace: true });
     } catch (err) {
       alert(err.response?.data?.message || "Registration failed");

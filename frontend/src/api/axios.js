@@ -2,14 +2,15 @@ import axios from "axios";
 
 /**
  * BASE URL RULE:
- * - Local development → http://localhost:8000
- * - Production (Vercel) → VITE_API_URL from env
+ * - Local → http://localhost:8000/api
+ * - Production → https://task-team-management-system-1.onrender.com/api
  */
 
 const api = axios.create({
   baseURL:
-    import.meta.env.VITE_API_URL || "http://localhost:8000",
-  withCredentials: true,
+    import.meta.env.VITE_API_URL
+      ? `${import.meta.env.VITE_API_URL}/api`
+      : "http://localhost:8000/api",
 });
 
 /* ================= REQUEST INTERCEPTOR ================= */
@@ -33,7 +34,7 @@ api.interceptors.response.use(
     if (error.response?.status === 401) {
       localStorage.removeItem("token");
 
-      // hard redirect (fixes stuck state issues)
+      // hard redirect to login
       window.location.replace("/");
     }
 

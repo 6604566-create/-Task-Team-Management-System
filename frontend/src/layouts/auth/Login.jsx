@@ -23,9 +23,9 @@ export default function Login() {
     setLoading(true);
 
     try {
-      const res = await axios.post("https://task-team-management-system-1.onrender.com/api/login", formData);
+      const res = await axios.post("/api/login", formData);
       localStorage.setItem("token", res.data.token);
-      navigate("https://task-team-management-system-1.onrender.com/admin/dashboard", { replace: true });
+      navigate("/admin/dashboard", { replace: true });
     } catch (err) {
       alert(err.response?.data?.message || "Login failed");
     } finally {

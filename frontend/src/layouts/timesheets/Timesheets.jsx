@@ -38,7 +38,7 @@ function Timesheets() {
   const fetchTimesheets = async () => {
     try {
       setLoading(true);
-      const res = await api.get("https://task-team-management-system-1.onrender.com/api/timesheets");
+      const res = await api.get("/api/timesheets");
       setTimesheets(Array.isArray(res.data) ? res.data : []);
     } catch (err) {
       console.error("Fetch timesheets error:", err);
@@ -50,7 +50,7 @@ function Timesheets() {
   /* FETCH STATS */
   const fetchStats = async () => {
     try {
-      const res = await api.get("https://task-team-management-system-1.onrender.com/api/timesheets-stats");
+      const res = await api.get("/api/timesheets-stats");
       setStats({
         totalTimesheets: res.data?.totalTimesheets ?? 0,
         developmentType: res.data?.developmentType ?? 0,
