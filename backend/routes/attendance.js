@@ -32,7 +32,7 @@ function calculateDuration(timeIn, timeOut) {
 
 /* ================= GET ATTENDANCE ================= */
 
-router.get("https://task-team-management-system-1.onrender.com/attendance", async (req, res) => {
+router.get("/attendance", async (req, res) => {
   try {
     const attendances = await Attendance.find()
       .populate("employee", "firstName lastName")
@@ -47,7 +47,7 @@ router.get("https://task-team-management-system-1.onrender.com/attendance", asyn
 
 /* ================= POST ATTENDANCE ================= */
 
-router.post("https://task-team-management-system-1.onrender.com/attendance", async (req, res) => {
+router.post("/attendance", async (req, res) => {
   try {
     const { employeeId, day, timeIn, timeOut } = req.body;
 

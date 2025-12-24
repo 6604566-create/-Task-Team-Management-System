@@ -5,7 +5,7 @@ import User from '../models/users.js';
 
 const router = express.Router();
 
-router.post('https://task-team-management-system-1.onrender.com/register', async (req, res) => {
+router.post('/register', async (req, res) => {
   try {
     const { firstName, lastName, email, password } = req.body;
 
@@ -31,7 +31,7 @@ router.post('https://task-team-management-system-1.onrender.com/register', async
   }
 });
 
-router.post('https://task-team-management-system-1.onrender.com/login', async (req, res) => {
+router.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;
 

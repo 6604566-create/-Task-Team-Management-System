@@ -5,7 +5,7 @@ import Timesheet from "../models/timesheets.js";
 const router = Router();
 
 /* ================= ADD TIMESHEET ================= */
-router.post("https://task-team-management-system-1.onrender.com/timesheet", authMiddleware, async (req, res) => {
+router.post("/timesheet", authMiddleware, async (req, res) => {
   try {
     const {
       notes,
@@ -58,7 +58,7 @@ router.post("https://task-team-management-system-1.onrender.com/timesheet", auth
 });
 
 /* ================= GET ALL TIMESHEETS ================= */
-router.get("https://task-team-management-system-1.onrender.com/timesheets", authMiddleware, async (req, res) => {
+router.get("/timesheets", authMiddleware, async (req, res) => {
   try {
     const timesheets = await Timesheet.find()
       .populate("employee", "firstName lastName")
@@ -74,7 +74,7 @@ router.get("https://task-team-management-system-1.onrender.com/timesheets", auth
 });
 
 /* ================= TIMESHEET STATS ================= */
-router.get("https://task-team-management-system-1.onrender.com/timesheets/stats", authMiddleware, async (req, res) => {
+router.get("/stats", authMiddleware, async (req, res) => {
   try {
     const total = await Timesheet.countDocuments();
 

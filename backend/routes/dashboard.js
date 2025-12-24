@@ -9,7 +9,7 @@ const router = Router();
 
 /* ================= DASHBOARD ================= */
 
-router.get("https://task-team-management-system-1.onrender.com/dashboard", authMiddleware, async (req, res) => {
+router.get("/dashboard", authMiddleware, async (req, res) => {
   try {
     // EMPLOYEES
     const totalEmployees = await User.countDocuments();
