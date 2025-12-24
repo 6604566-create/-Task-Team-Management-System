@@ -9,7 +9,7 @@ function Navbar() {
     localStorage.removeItem("token");
 
     // FULL RESET (BEST FOR AUTH LOGOUT)
-    window.location.href = "/";
+    window.location.href = "https://task-team-management-system-1.onrender.com/";
   };
 
   const today = new Date();

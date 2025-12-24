@@ -137,7 +137,7 @@ function Employees() {
   const getEmployees = useCallback(async () => {
     try {
       setLoading(true);
-      const res = await api.get("/api/employees");
+      const res = await api.get("https://task-team-management-system-1.onrender.com/api/employees");
       setEmployeesData(res.data);
     } catch (err) {
       if (err.response?.status === 401) {
@@ -151,12 +151,12 @@ function Employees() {
 
   const getEmployeesStats = useCallback(async () => {
     try {
-      const res = await api.get("/api/employees-stats");
+      const res = await api.get("https://task-team-management-system-1.onrender.com/api/employees-stats");
       setEmployeesStats(res.data);
     } catch (err) {
       if (err.response?.status === 401) {
         localStorage.removeItem("token");
-        navigate("/", { replace: true });
+        navigate("https://task-team-management-system-1.onrender.com/", { replace: true });
       }
     }
   }, [navigate]);

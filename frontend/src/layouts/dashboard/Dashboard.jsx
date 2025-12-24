@@ -130,12 +130,12 @@ function Dashboard() {
 
   const fetchDashboard = useCallback(async () => {
     try {
-      const res = await api.get("/api/dashboard");
+      const res = await api.get("https://task-team-management-system-1.onrender.com/api/dashboard");
       setDashboardData(res.data);
     } catch (err) {
       if (err.response?.status === 401) {
         localStorage.removeItem("token");
-        navigate("/", { replace: true });
+        navigate("https://task-team-management-system-1.onrender.com/", { replace: true });
       }
     } finally {
       setLoading(false);

@@ -23,11 +23,11 @@ function Sidenav() {
   const [open, setOpen] = useState(true);
 
   const menu = [
-    { name: "Dashboard", path: "/admin/dashboard", icon: <MdDashboard /> },
-    { name: "Employees", path: "/admin/employees", icon: <MdPeople /> },
-    { name: "Projects", path: "/admin/projects", icon: <MdWork /> },
-    { name: "Tasks", path: "/admin/tasks", icon: <MdTask /> },
-    { name: "Timesheets", path: "/admin/timesheets", icon: <MdAccessTime /> },
+    { name: "Dashboard", path: "https://task-team-management-system-1.onrender.com/admin/dashboard", icon: <MdDashboard /> },
+    { name: "Employees", path: "https://task-team-management-system-1.onrender.com/admin/employees", icon: <MdPeople /> },
+    { name: "Projects", path: "https://task-team-management-system-1.onrender.com/admin/projects", icon: <MdWork /> },
+    { name: "Tasks", path: "https://task-team-management-system-1.onrender.com/admin/tasks", icon: <MdTask /> },
+    { name: "Timesheets", path: "https://task-team-management-system-1.onrender.com/admin/timesheets", icon: <MdAccessTime /> },
     {
       name: "Attendance",
       path: "/admin/attendance",

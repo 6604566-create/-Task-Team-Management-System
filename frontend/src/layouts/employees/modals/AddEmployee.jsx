@@ -56,7 +56,7 @@ function AddEmployeeModal({ isOpen, onClose }) {
     setLoading(true);
 
     try {
-      const res = await api.post("/api/employee", formData);
+      const res = await api.post("https://task-team-management-system-1.onrender.com/api/employee", formData);
 
       toast({
         title: res.data.message || "Employee added successfully",

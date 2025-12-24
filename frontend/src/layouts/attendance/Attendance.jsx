@@ -26,7 +26,7 @@ function Attendance() {
 
   const fetchAttendance = async () => {
     try {
-      const res = await api.get("/api/attendance");
+      const res = await api.get("https://task-team-management-system-1.onrender.com/api/attendance");
       setAttendanceData(Array.isArray(res.data) ? res.data : []);
     } catch (err) {
       console.error("Attendance fetch error:", err);

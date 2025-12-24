@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import axios from "axios";
+import axios from '../../api/axios.js'
 
 import girlImg from "../../assets/sigin/signup.png";
 
@@ -23,7 +23,7 @@ export default function Register() {
     setLoading(true);
 
     try {
-      await axios.post("/api/register", formData);
+      await axios.post("https://task-team-management-system-1.onrender.com/api/register", formData);
       navigate("/", { replace: true });
     } catch (err) {
       alert(err.response?.data?.message || "Registration failed");

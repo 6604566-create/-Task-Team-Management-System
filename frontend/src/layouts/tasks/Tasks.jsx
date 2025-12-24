@@ -39,7 +39,7 @@ function Tasks() {
   /* FETCH TASKS */
   const fetchTasks = async () => {
     try {
-      const res = await api.get("/api/tasks");
+      const res = await api.get("https://task-team-management-system-1.onrender.com/api/tasks");
       setTasks(res.data);
     } catch (err) {
       console.error("Fetch tasks error:", err);
@@ -53,7 +53,7 @@ function Tasks() {
   /* DELETE TASK */
   const handleDeleteTask = async (id) => {
     try {
-      await api.delete(`/api/tasks/${id}`);
+      await api.delete(`https://task-team-management-system-1.onrender.com/api/tasks/${id}`);
       setTasks((prev) => prev.filter((t) => t._id !== id));
       setIsReadTaskOpen(false);
     } catch (err) {

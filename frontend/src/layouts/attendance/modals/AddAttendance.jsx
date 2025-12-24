@@ -30,7 +30,7 @@ export default function AddAttendanceModal({ isOpen, onClose }) {
   const fetchEmployees = async () => {
     setLoadingEmployees(true);
     try {
-      const res = await api.get("/api/employees");
+      const res = await api.get("https://task-team-management-system-1.onrender.com/api/employees");
       setEmployees(res.data);
     } catch {
       toast({
@@ -71,7 +71,7 @@ export default function AddAttendanceModal({ isOpen, onClose }) {
     setLoading(true);
 
     try {
-      await api.post("/api/attendance", {
+      await api.post("https://task-team-management-system-1.onrender.com/api/attendance", {
         employeeId,
         day: getCurrentDate(),
         timeIn: attendanceType === "time_in" ? getCurrentTime() : null,

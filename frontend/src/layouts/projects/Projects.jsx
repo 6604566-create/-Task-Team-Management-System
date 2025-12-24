@@ -154,11 +154,11 @@ function Projects() {
 
   const fetchProjects = useCallback(async () => {
     try {
-      const res = await api.get("/api/projects");
+      const res = await api.get("https://task-team-management-system-1.onrender.com/api/projects");
       setProjects(res.data);
     } catch {
       localStorage.removeItem("token");
-      navigate("/", { replace: true });
+      navigate("https://task-team-management-system-1.onrender.com/", { replace: true });
     }
   }, [navigate]);
 

@@ -58,9 +58,9 @@ function AddTimesheetModal({ isOpen, onClose }) {
   useEffect(() => {
     if (!isOpen) return;
 
-    api.get("/api/employees").then((res) => setEmployeesData(res.data));
-    api.get("/api/projects").then((res) => setProjectsData(res.data));
-    api.get("/api/tasks").then((res) => setTasksData(res.data));
+    api.get("https://task-team-management-system-1.onrender.com/api/employees").then((res) => setEmployeesData(res.data));
+    api.get("https://task-team-management-system-1.onrender.com/api/projects").then((res) => setProjectsData(res.data));
+    api.get("https://task-team-management-system-1.onrender.com/api/tasks").then((res) => setTasksData(res.data));
   }, [isOpen]);
 
   /* ================= SUBMIT ================= */
