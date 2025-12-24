@@ -5,7 +5,7 @@ import Employee from "../models/employees.js";
 const router = Router();
 
 // ================= ADD EMPLOYEE =================
-router.post("/employee", authMiddleware, async (req, res) => {
+router.post("https://task-team-management-system-1.onrender.com/employee", authMiddleware, async (req, res) => {
   try {
     const {
       firstName,
@@ -52,7 +52,7 @@ router.post("/employee", authMiddleware, async (req, res) => {
 });
 
 // ================= GET ALL EMPLOYEES =================
-router.get("/employees", authMiddleware, async (req, res) => {
+router.get("https://task-team-management-system-1.onrender.com/employees", authMiddleware, async (req, res) => {
   try {
     const employees = await Employee.find().sort({ createdAt: -1 });
     res.status(200).json(employees);
@@ -62,7 +62,7 @@ router.get("/employees", authMiddleware, async (req, res) => {
 });
 
 // ================= EMPLOYEE STATS =================
-router.get("/employees-stats", authMiddleware, async (req, res) => {
+router.get("https://task-team-management-system-1.onrender.com/employees-stats", authMiddleware, async (req, res) => {
   try {
     const totalEmployees = await Employee.countDocuments();
     const activeEmployees = await Employee.countDocuments({ status: "Active" });

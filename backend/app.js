@@ -24,7 +24,7 @@ connectDB();
 /* ================= MIDDLEWARE ================= */
 app.use(
   cors({
-    origin: "http://localhost:3000",
+    origin: true, // ✅ FIXED
     credentials: true,
   })
 );

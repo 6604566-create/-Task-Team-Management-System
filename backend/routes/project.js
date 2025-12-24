@@ -8,7 +8,7 @@ const router = Router();
  * ✅ Add Project
  * POST /project
  */
-router.post('/project', authMiddleware, async (req, res) => {
+router.post('https://task-team-management-system-1.onrender.com/project', authMiddleware, async (req, res) => {
   try {
     const {
       title,
@@ -43,7 +43,7 @@ router.post('/project', authMiddleware, async (req, res) => {
  * ✅ Get All Projects
  * GET /projects
  */
-router.get('/projects', authMiddleware, async (req, res) => {
+router.get('https://task-team-management-system-1.onrender.com/projects', authMiddleware, async (req, res) => {
   try {
     const projects = await Project.find().sort({ createdAt: -1 });
     res.status(200).json(projects);
@@ -56,7 +56,7 @@ router.get('/projects', authMiddleware, async (req, res) => {
  * ✅ Delete Project
  * DELETE /projects/:id
  */
-router.delete('/projects/:id', authMiddleware, async (req, res) => {
+router.delete('https://task-team-management-system-1.onrender.com/projects/:id', authMiddleware, async (req, res) => {
   try {
     const { id } = req.params;
 

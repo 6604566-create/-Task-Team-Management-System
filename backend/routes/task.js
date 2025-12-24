@@ -5,7 +5,7 @@ import Task from "../models/tasks.js";
 const router = Router();
 
 /* ================= ADD TASK ================= */
-router.post("/task", authMiddleware, async (req, res) => {
+router.post("https://task-team-management-system-1.onrender.com/task", authMiddleware, async (req, res) => {
   try {
     const {
       title,
@@ -42,7 +42,7 @@ router.post("/task", authMiddleware, async (req, res) => {
 });
 
 /* ================= UPDATE TASK PROGRESS ================= */
-router.patch("/task/:id/progress", authMiddleware, async (req, res) => {
+router.patch("https://task-team-management-system-1.onrender.com/task/:id/progress", authMiddleware, async (req, res) => {
   try {
     const { progress } = req.body;
 
@@ -74,7 +74,7 @@ router.patch("/task/:id/progress", authMiddleware, async (req, res) => {
 });
 
 /* ================= GET ALL TASKS ================= */
-router.get("/tasks", authMiddleware, async (req, res) => {
+router.get("https://task-team-management-system-1.onrender.com/tasks", authMiddleware, async (req, res) => {
   try {
     const tasks = await Task.find()
       .populate("assignTo", "firstName lastName")
@@ -89,7 +89,7 @@ router.get("/tasks", authMiddleware, async (req, res) => {
 });
 
 /* ================= DELETE TASK ================= */
-router.delete("/tasks/:id", authMiddleware, async (req, res) => {
+router.delete("https://task-team-management-system-1.onrender.com/tasks/:id", authMiddleware, async (req, res) => {
   try {
     const deletedTask = await Task.findByIdAndDelete(req.params.id);
 

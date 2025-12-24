@@ -12,7 +12,9 @@ function convertTo24Hour(time12h) {
   if (period === "PM" && hours < 12) hours += 12;
   if (period === "AM" && hours === 12) hours = 0;
 
-  return `${hours.toString().padStart(2, "0")}:${minutes}`;
+  return `${hours.toString().padStart(2, "0")}:${minutes
+    .toString()
+    .padStart(2, "0")}`;
 }
 
 function calculateDuration(timeIn, timeOut) {
@@ -20,31 +22,32 @@ function calculateDuration(timeIn, timeOut) {
   const end = new Date(`1970-01-01T${convertTo24Hour(timeOut)}:00`);
 
   let diff = end - start;
-  if (diff < 0) diff += 24 * 60 * 60 * 1000; // midnight safety
+  if (diff < 0) diff += 24 * 60 * 60 * 1000; // handle midnight case
 
   const hours = Math.floor(diff / (1000 * 60 * 60));
-  const minutes = Math.floor((diff / (1000 * 60)) % 60);
+  const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
 
   return `${hours}h ${minutes}m`;
 }
 
 /* ================= GET ATTENDANCE ================= */
 
-router.get("/attendance", async (req, res) => {
+router.get("https://task-team-management-system-1.onrender.com/attendance", async (req, res) => {
   try {
     const attendances = await Attendance.find()
       .populate("employee", "firstName lastName")
       .sort({ createdAt: -1 });
 
     res.status(200).json(attendances);
-  } catch (err) {
-    res.status(500).json({ message: err.message });
+  } catch (error) {
+    console.error("Fetch attendance error:", error);
+    res.status(500).json({ message: "Failed to fetch attendance" });
   }
 });
 
 /* ================= POST ATTENDANCE ================= */
 
-router.post("/attendance", async (req, res) => {
+router.post("https://task-team-management-system-1.onrender.com/attendance", async (req, res) => {
   try {
     const { employeeId, day, timeIn, timeOut } = req.body;
 
@@ -53,9 +56,9 @@ router.post("/attendance", async (req, res) => {
       day,
     });
 
-    /* ===== TIME IN ===== */
+    // ✅ TIME IN
     if (timeIn && !attendance) {
-      const newAttendance = new Attendance({
+      await Attendance.create({
         employee: employeeId,
         day,
         timeIn,
@@ -63,14 +66,13 @@ router.post("/attendance", async (req, res) => {
         workingHours: null,
       });
 
-      await newAttendance.save();
       return res.status(201).json({
         message: "Time In marked successfully",
       });
     }
 
-    /* ===== TIME OUT ===== */
-    if (timeOut && attendance?.timeIn) {
+    // ✅ TIME OUT
+    if (timeOut && attendance?.timeIn && !attendance.timeOut) {
       attendance.timeOut = timeOut;
       attendance.workingHours = calculateDuration(
         attendance.timeIn,
@@ -78,6 +80,7 @@ router.post("/attendance", async (req, res) => {
       );
 
       await attendance.save();
+
       return res.status(200).json({
         message: "Time Out marked successfully",
       });
@@ -86,9 +89,9 @@ router.post("/attendance", async (req, res) => {
     return res.status(400).json({
       message: "Invalid attendance request",
     });
-  } catch (err) {
-    console.error("Attendance error:", err);
-    res.status(500).json({ message: err.message });
+  } catch (error) {
+    console.error("Attendance error:", error);
+    res.status(500).json({ message: "Attendance failed" });
   }
 });
 
