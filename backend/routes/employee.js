@@ -1,10 +1,10 @@
 import { Router } from "express";
 import authMiddleware from "../middleware/auth.js";
-import Employee from "../models/employees.js";
+import Employee from "../models/employees.js"; // ✅ FIXED PATH
 
 const router = Router();
 
-// ================= ADD EMPLOYEE =================
+/* ================= ADD EMPLOYEE ================= */
 router.post("/employee", authMiddleware, async (req, res) => {
   try {
     const {
@@ -21,12 +21,29 @@ router.post("/employee", authMiddleware, async (req, res) => {
       gender,
     } = req.body;
 
-    if (await Employee.findOne({ email }))
-      return res.status(400).json({ message: "Email already exists" });
+    /* ===== BASIC VALIDATION ===== */
+    if (!firstName || !lastName || !email || !cnic || !role) {
+      return res.status(400).json({
+        message: "Required fields are missing",
+      });
+    }
 
-    if (await Employee.findOne({ cnic }))
-      return res.status(400).json({ message: "CNIC already exists" });
+    /* ===== UNIQUE CHECKS ===== */
+    const emailExists = await Employee.findOne({ email });
+    if (emailExists) {
+      return res.status(400).json({
+        message: "Email already exists",
+      });
+    }
 
+    const cnicExists = await Employee.findOne({ cnic });
+    if (cnicExists) {
+      return res.status(400).json({
+        message: "CNIC already exists",
+      });
+    }
+
+    /* ===== CREATE EMPLOYEE ===== */
     const employee = await Employee.create({
       firstName,
       lastName,
@@ -47,27 +64,38 @@ router.post("/employee", authMiddleware, async (req, res) => {
     });
   } catch (error) {
     console.error("Add Employee Error:", error);
-    res.status(500).json({ message: error.message });
+    res.status(500).json({
+      message: "Failed to add employee",
+    });
   }
 });
 
-// ================= GET ALL EMPLOYEES =================
+/* ================= GET ALL EMPLOYEES ================= */
 router.get("/employees", authMiddleware, async (req, res) => {
   try {
     const employees = await Employee.find().sort({ createdAt: -1 });
     res.status(200).json(employees);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error("Fetch Employees Error:", error);
+    res.status(500).json({
+      message: "Failed to fetch employees",
+    });
   }
 });
 
-// ================= EMPLOYEE STATS =================
+/* ================= EMPLOYEE STATS ================= */
 router.get("/employees-stats", authMiddleware, async (req, res) => {
   try {
     const totalEmployees = await Employee.countDocuments();
-    const activeEmployees = await Employee.countDocuments({ status: "Active" });
-    const inActiveEmployees = await Employee.countDocuments({ status: "In Active" });
-    const terminatedEmployees = await Employee.countDocuments({ status: "Terminated" });
+    const activeEmployees = await Employee.countDocuments({
+      status: "Active",
+    });
+    const inActiveEmployees = await Employee.countDocuments({
+      status: "In Active",
+    });
+    const terminatedEmployees = await Employee.countDocuments({
+      status: "Terminated",
+    });
 
     res.status(200).json({
       totalEmployees,
@@ -76,7 +104,10 @@ router.get("/employees-stats", authMiddleware, async (req, res) => {
       terminatedEmployees,
     });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error("Employee Stats Error:", error);
+    res.status(500).json({
+      message: "Failed to fetch employee stats",
+    });
   }
 });
 

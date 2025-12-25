@@ -1,4 +1,5 @@
 import { Router } from "express";
+import mongoose from "mongoose";
 import authMiddleware from "../middleware/auth.js";
 import Task from "../models/tasks.js";
 
@@ -16,8 +17,17 @@ router.post("/task", authMiddleware, async (req, res) => {
       priority,
     } = req.body;
 
-    if (!title || !description || !assignTo || !project || !startDate || !priority) {
-      return res.status(400).json({ message: "All fields are required" });
+    if (
+      !title ||
+      !description ||
+      !assignTo ||
+      !project ||
+      !startDate ||
+      !priority
+    ) {
+      return res.status(400).json({
+        message: "All fields are required",
+      });
     }
 
     const task = await Task.create({
@@ -37,19 +47,26 @@ router.post("/task", authMiddleware, async (req, res) => {
     });
   } catch (error) {
     console.error("Add Task Error:", error);
-    res.status(500).json({ message: error.message });
+    res.status(500).json({
+      message: "Failed to add task",
+    });
   }
 });
 
 /* ================= UPDATE TASK PROGRESS ================= */
 router.patch("/task/:id/progress", authMiddleware, async (req, res) => {
   try {
+    const { id } = req.params;
     const { progress } = req.body;
 
-    if (progress < 0 || progress > 100) {
-      return res
-        .status(400)
-        .json({ message: "Progress must be between 0 and 100" });
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: "Invalid task ID" });
+    }
+
+    if (progress === undefined || progress < 0 || progress > 100) {
+      return res.status(400).json({
+        message: "Progress must be between 0 and 100",
+      });
     }
 
     let status = "Pending";
@@ -57,7 +74,7 @@ router.patch("/task/:id/progress", authMiddleware, async (req, res) => {
     if (progress === 100) status = "Completed";
 
     const task = await Task.findByIdAndUpdate(
-      req.params.id,
+      id,
       { progress, status },
       { new: true }
     );
@@ -69,7 +86,9 @@ router.patch("/task/:id/progress", authMiddleware, async (req, res) => {
     res.status(200).json(task);
   } catch (error) {
     console.error("Update Task Progress Error:", error);
-    res.status(500).json({ message: error.message });
+    res.status(500).json({
+      message: "Failed to update task progress",
+    });
   }
 });
 
@@ -84,23 +103,35 @@ router.get("/tasks", authMiddleware, async (req, res) => {
     res.status(200).json(tasks);
   } catch (error) {
     console.error("Fetch Tasks Error:", error);
-    res.status(500).json({ message: error.message });
+    res.status(500).json({
+      message: "Failed to fetch tasks",
+    });
   }
 });
 
 /* ================= DELETE TASK ================= */
 router.delete("/tasks/:id", authMiddleware, async (req, res) => {
   try {
-    const deletedTask = await Task.findByIdAndDelete(req.params.id);
+    const { id } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: "Invalid task ID" });
+    }
+
+    const deletedTask = await Task.findByIdAndDelete(id);
 
     if (!deletedTask) {
       return res.status(404).json({ message: "Task not found" });
     }
 
-    res.status(200).json({ message: "Task deleted successfully" });
+    res.status(200).json({
+      message: "Task deleted successfully",
+    });
   } catch (error) {
     console.error("Delete Task Error:", error);
-    res.status(500).json({ message: error.message });
+    res.status(500).json({
+      message: "Failed to delete task",
+    });
   }
 });
 

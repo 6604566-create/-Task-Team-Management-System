@@ -3,7 +3,7 @@ import Attendance from "../models/attendances.js";
 
 const router = express.Router();
 
-/* ================= HELPER FUNCTIONS ================= */
+/* ================= HELPERS ================= */
 
 function convertTo24Hour(time12h) {
   const [time, period] = time12h.split(" ");
@@ -22,7 +22,7 @@ function calculateDuration(timeIn, timeOut) {
   const end = new Date(`1970-01-01T${convertTo24Hour(timeOut)}:00`);
 
   let diff = end - start;
-  if (diff < 0) diff += 24 * 60 * 60 * 1000; // handle midnight case
+  if (diff < 0) diff += 24 * 60 * 60 * 1000; // midnight safety
 
   const hours = Math.floor(diff / (1000 * 60 * 60));
   const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
@@ -51,13 +51,23 @@ router.post("/attendance", async (req, res) => {
   try {
     const { employeeId, day, timeIn, timeOut } = req.body;
 
+    if (!employeeId || !day) {
+      return res.status(400).json({ message: "Employee and day are required" });
+    }
+
     let attendance = await Attendance.findOne({
       employee: employeeId,
       day,
     });
 
-    // ✅ TIME IN
-    if (timeIn && !attendance) {
+    /* ===== TIME IN ===== */
+    if (timeIn) {
+      if (attendance) {
+        return res
+          .status(400)
+          .json({ message: "Time In already marked for today" });
+      }
+
       await Attendance.create({
         employee: employeeId,
         day,
@@ -71,8 +81,20 @@ router.post("/attendance", async (req, res) => {
       });
     }
 
-    // ✅ TIME OUT
-    if (timeOut && attendance?.timeIn && !attendance.timeOut) {
+    /* ===== TIME OUT ===== */
+    if (timeOut) {
+      if (!attendance || !attendance.timeIn) {
+        return res
+          .status(400)
+          .json({ message: "Time In not found for today" });
+      }
+
+      if (attendance.timeOut) {
+        return res
+          .status(400)
+          .json({ message: "Time Out already marked" });
+      }
+
       attendance.timeOut = timeOut;
       attendance.workingHours = calculateDuration(
         attendance.timeIn,

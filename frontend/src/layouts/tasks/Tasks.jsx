@@ -33,16 +33,22 @@ import { IoMdAdd } from "react-icons/io";
 function Tasks() {
   const [tasks, setTasks] = useState([]);
   const [selectedTask, setSelectedTask] = useState(null);
+
   const [isAddTaskOpen, setIsAddTaskOpen] = useState(false);
   const [isReadTaskOpen, setIsReadTaskOpen] = useState(false);
+  const [loading, setLoading] = useState(true);
 
-  /* FETCH TASKS */
+  /* ================= FETCH TASKS ================= */
+
   const fetchTasks = async () => {
     try {
-      const res = await api.get("/tasks");
-      setTasks(res.data);
+      setLoading(true);
+      const res = await api.get("/tasks"); // ✅ correct
+      setTasks(Array.isArray(res.data) ? res.data : []);
     } catch (err) {
       console.error("Fetch tasks error:", err);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -50,10 +56,11 @@ function Tasks() {
     fetchTasks();
   }, []);
 
-  /* DELETE TASK */
+  /* ================= DELETE TASK ================= */
+
   const handleDeleteTask = async (id) => {
     try {
-      await api.delete(`/api/tasks/${id}`);
+      await api.delete(`/tasks/${id}`); // ✅ correct
       setTasks((prev) => prev.filter((t) => t._id !== id));
       setIsReadTaskOpen(false);
     } catch (err) {
@@ -61,10 +68,13 @@ function Tasks() {
     }
   };
 
-  /* STATS */
+  /* ================= STATS ================= */
+
   const total = tasks.length;
   const completed = tasks.filter((t) => t.progress === 100).length;
   const pending = total - completed;
+
+  /* ================= UI ================= */
 
   return (
     <>
@@ -86,7 +96,7 @@ function Tasks() {
 
       {/* PAGE */}
       <Flex minH="100vh" bg="linear-gradient(135deg, #0f172a, #1e293b)">
-        {/* SIDENAV */}
+        {/* SIDEBAR */}
         <Box w="240px">
           <Sidenav />
         </Box>
@@ -106,11 +116,7 @@ function Tasks() {
                 <Text fontSize="13px" color="#cbd5f5">
                   {stat.label}
                 </Text>
-                <Text
-                  fontSize="28px"
-                  fontWeight="700"
-                  color={stat.color}
-                >
+                <Text fontSize="28px" fontWeight="700" color={stat.color}>
                   {stat.value}
                 </Text>
               </Box>
@@ -138,66 +144,66 @@ function Tasks() {
                 </Button>
               </Flex>
 
-              <Flex direction="column" gap={4}>
-                {tasks.length === 0 && (
-                  <Text color="#cbd5f5" textAlign="center">
-                    No tasks yet. Add your first task 🚀
-                  </Text>
-                )}
+              {loading ? (
+                <Text color="#cbd5f5" textAlign="center">
+                  Loading tasks...
+                </Text>
+              ) : tasks.length === 0 ? (
+                <Text color="#cbd5f5" textAlign="center">
+                  No tasks yet. Add your first task 🚀
+                </Text>
+              ) : (
+                <Flex direction="column" gap={4}>
+                  {tasks.map((task) => (
+                    <Box key={task._id} sx={styles.taskCard}>
+                      <Flex justify="space-between" align="center" mb={2}>
+                        <Text fontWeight="600" color="#fff">
+                          {task.title}
+                        </Text>
 
-                {tasks.map((task) => (
-                  <Box key={task._id} sx={styles.taskCard}>
-                    <Flex justify="space-between" align="center" mb={2}>
-                      <Text fontWeight="600" color="#fff">
-                        {task.title}
+                        <IoReaderOutline
+                          style={{ cursor: "pointer", color: "#fff" }}
+                          onClick={() => {
+                            setSelectedTask(task);
+                            setIsReadTaskOpen(true);
+                          }}
+                        />
+                      </Flex>
+
+                      <Text fontSize="13px" color="#cbd5f5" noOfLines={2}>
+                        {task.description}
                       </Text>
 
-                      <IoReaderOutline
-                        style={{ cursor: "pointer", color: "#fff" }}
-                        onClick={() => {
-                          setSelectedTask(task);
-                          setIsReadTaskOpen(true);
-                        }}
-                      />
-                    </Flex>
+                      <Flex justify="space-between" align="center" mt={3}>
+                        <Badge
+                          colorScheme={
+                            task.priority === "Most Important"
+                              ? "red"
+                              : task.priority === "Important"
+                              ? "yellow"
+                              : "green"
+                          }
+                        >
+                          {task.priority}
+                        </Badge>
 
-                    <Text
-                      fontSize="13px"
-                      color="#cbd5f5"
-                      noOfLines={2}
-                    >
-                      {task.description}
-                    </Text>
-
-                    <Flex justify="space-between" align="center" mt={3}>
-                      <Badge
-                        colorScheme={
-                          task.priority === "Most Important"
-                            ? "red"
-                            : task.priority === "Important"
-                            ? "yellow"
-                            : "green"
-                        }
-                      >
-                        {task.priority}
-                      </Badge>
-
-                      <Text fontSize="11px" color="#94a3b8">
-                        {task.createdAt
-                          ? new Date(task.createdAt).toLocaleDateString(
-                              "en-IN",
-                              {
-                                day: "2-digit",
-                                month: "short",
-                                year: "numeric",
-                              }
-                            )
-                          : "N/A"}
-                      </Text>
-                    </Flex>
-                  </Box>
-                ))}
-              </Flex>
+                        <Text fontSize="11px" color="#94a3b8">
+                          {task.createdAt
+                            ? new Date(task.createdAt).toLocaleDateString(
+                                "en-IN",
+                                {
+                                  day: "2-digit",
+                                  month: "short",
+                                  year: "numeric",
+                                }
+                              )
+                            : "N/A"}
+                        </Text>
+                      </Flex>
+                    </Box>
+                  ))}
+                </Flex>
+              )}
             </Box>
 
             {/* PROGRESS */}
@@ -265,7 +271,6 @@ const styles = {
     backdropFilter: "blur(14px)",
     borderRadius: "16px",
     padding: "16px",
-    transition: "transform 0.3s ease",
     boxShadow: "0 20px 40px rgba(0,0,0,0.35)",
   },
 
@@ -273,7 +278,7 @@ const styles = {
     background: "#ec4899",
     color: "#fff",
     borderRadius: "30px",
-    px: "18px",
+    padding: "8px 18px",
     _hover: { bg: "#db2777" },
   },
 };

@@ -1,37 +1,44 @@
-import { Schema, model } from 'mongoose';
+import { Schema, model } from "mongoose";
 
 const projectSchema = new Schema(
   {
     title: {
       type: String,
       required: true,
+      trim: true,
     },
+
     description: {
       type: String,
-      required: true,
+      trim: true,
     },
+
     clientName: {
       type: String,
       required: true,
+      trim: true,
     },
+
     startDate: {
       type: Date,
       required: true,
     },
+
     status: {
       type: String,
-      enum: ['On Hold', 'In Progress', 'Testing', 'Completed'],
-      required: true,
+      enum: ["On Hold", "In Progress", "Testing", "Completed"],
+      default: "In Progress",
     },
+
     priority: {
       type: String,
-      enum: ['Most Important', 'Important', 'Least Important'],
-      required: true,
+      enum: ["Most Important", "Important", "Least Important"],
+      default: "Important",
     },
   },
   {
-    timestamps: true, // ✅ THIS FIXES "Invalid Date"
+    timestamps: true, // ✅ GOOD (createdAt, updatedAt)
   }
 );
 
-export default model('Project', projectSchema);
+export default model("Project", projectSchema);

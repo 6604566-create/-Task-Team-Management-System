@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 import {
   Modal,
   ModalOverlay,
@@ -10,34 +10,17 @@ import {
   Button,
   Tag,
   Text,
-} from '@chakra-ui/react';
-import { MdDelete } from 'react-icons/md';
+} from "@chakra-ui/react";
+import { MdDelete } from "react-icons/md";
 
 function ReadTaskModal({ isOpen, onClose, task, onDelete }) {
-  if (!task) {
-    return (
-      <Modal isOpen={isOpen} onClose={onClose} isCentered>
-        <ModalOverlay />
-        <ModalContent>
-          <ModalHeader>Task Details</ModalHeader>
-          <ModalCloseButton />
-          <ModalBody>
-            <Text textAlign="center" color="gray.500">
-              No task selected
-            </Text>
-          </ModalBody>
-          <ModalFooter>
-            <Button onClick={onClose}>Close</Button>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
-    );
-  }
-
   const handleDelete = () => {
-    if (window.confirm('Delete this task?')) {
+    if (!task || !onDelete) return;
+
+    const confirm = window.confirm("Are you sure you want to delete this task?");
+    if (confirm) {
       onDelete(task._id);
-      onClose(); // ✅ close modal after delete
+      onClose();
     }
   };
 
@@ -46,8 +29,8 @@ function ReadTaskModal({ isOpen, onClose, task, onDelete }) {
       isOpen={isOpen}
       onClose={onClose}
       size="xl"
-      closeOnOverlayClick={false}
       isCentered
+      closeOnOverlayClick={false}
     >
       <ModalOverlay />
       <ModalContent>
@@ -55,56 +38,72 @@ function ReadTaskModal({ isOpen, onClose, task, onDelete }) {
         <ModalCloseButton />
 
         <ModalBody>
-          <div className="task-card-container">
-            {/* Title */}
-            <p className="task-title">{task.title}</p>
+          {!task ? (
+            <Text textAlign="center" color="gray.500">
+              No task selected
+            </Text>
+          ) : (
+            <div className="task-card-container">
+              {/* TITLE */}
+              <Text fontSize="lg" fontWeight="bold" mb={2}>
+                {task.title}
+              </Text>
 
-            {/* Description */}
-            <div className="task-desc-container">
-              <p className="task-desc">{task.description}</p>
-            </div>
+              {/* DESCRIPTION */}
+              <Text mb={4} color="gray.600">
+                {task.description}
+              </Text>
 
-            {/* Footer */}
-            <div className="task-card-footer-container">
-              <Tag
-                size="lg"
-                borderRadius="full"
-                colorScheme={
-                  task.priority === 'Most Important'
-                    ? 'red'
-                    : task.priority === 'Important'
-                    ? 'yellow'
-                    : 'green'
-                }
-              >
-                {task.priority}
-              </Tag>
-
+              {/* FOOTER */}
               <div
-                className="task-read"
-                style={{ cursor: 'pointer' }}
-                onClick={handleDelete}
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  marginBottom: "12px",
+                }}
               >
-                <MdDelete className="read-icon" />
-              </div>
-            </div>
+                <Tag
+                  size="lg"
+                  borderRadius="full"
+                  colorScheme={
+                    task.priority === "Most Important"
+                      ? "red"
+                      : task.priority === "Important"
+                      ? "yellow"
+                      : "green"
+                  }
+                >
+                  {task.priority}
+                </Tag>
 
-            {/* ✅ SAFE & CONSISTENT DATE */}
-            <p className="created">
-              Created on:{' '}
-              {task.createdAt
-                ? new Date(task.createdAt).toLocaleDateString('en-IN', {
-                    day: '2-digit',
-                    month: 'short',
-                    year: 'numeric',
-                  })
-                : 'N/A'}
-            </p>
-          </div>
+                <MdDelete
+                  style={{
+                    cursor: "pointer",
+                    fontSize: "22px",
+                    color: "#e53e3e",
+                  }}
+                  onClick={handleDelete}
+                />
+              </div>
+
+              {/* CREATED DATE */}
+              <Text fontSize="sm" color="gray.500">
+                Created on:{" "}
+                {task.createdAt
+                  ? new Date(task.createdAt).toLocaleDateString("en-IN", {
+                      day: "2-digit",
+                      month: "short",
+                      year: "numeric",
+                    })
+                  : "N/A"}
+              </Text>
+            </div>
+          )}
         </ModalBody>
 
         <ModalFooter>
-          <Button bg="darkcyan" color="white" onClick={onClose}>
+          <Button colorScheme="teal" onClick={onClose}>
             Close
           </Button>
         </ModalFooter>

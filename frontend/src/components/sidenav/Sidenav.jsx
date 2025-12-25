@@ -11,9 +11,8 @@ import {
   MdClose,
 } from "react-icons/md";
 
-/* 🔹 IMPORT YOUR PROFILE IMAGE */
+/* PROFILE IMAGE */
 import profileImg from "../../assets/sigin/my.png";
-// 👆 change path if needed
 
 /* ================= COMPONENT ================= */
 
@@ -23,16 +22,12 @@ function Sidenav() {
   const [open, setOpen] = useState(true);
 
   const menu = [
-    { name: "Dashboard", path: "https://task-team-management-system-1.onrender.com/admin/dashboard", icon: <MdDashboard /> },
-    { name: "Employees", path: "https://task-team-management-system-1.onrender.com/admin/employees", icon: <MdPeople /> },
-    { name: "Projects", path: "https://task-team-management-system-1.onrender.com/admin/projects", icon: <MdWork /> },
-    { name: "Tasks", path: "https://task-team-management-system-1.onrender.com/admin/tasks", icon: <MdTask /> },
-    { name: "Timesheets", path: "https://task-team-management-system-1.onrender.com/admin/timesheets", icon: <MdAccessTime /> },
-    {
-      name: "Attendance",
-      path: "/admin/attendance",
-      icon: <MdEventAvailable />,
-    },
+    { name: "Dashboard", path: "/admin/dashboard", icon: <MdDashboard /> },
+    { name: "Employees", path: "/admin/employees", icon: <MdPeople /> },
+    { name: "Projects", path: "/admin/projects", icon: <MdWork /> },
+    { name: "Tasks", path: "/admin/tasks", icon: <MdTask /> },
+    { name: "Timesheets", path: "/admin/timesheets", icon: <MdAccessTime /> },
+    { name: "Attendance", path: "/admin/attendance", icon: <MdEventAvailable /> },
   ];
 
   return (
@@ -88,7 +83,6 @@ export default Sidenav;
 /* ================= STYLES ================= */
 
 const styles = {
-  /* TOGGLE BUTTON */
   toggleBtn: {
     position: "fixed",
     top: "22px",
@@ -108,7 +102,6 @@ const styles = {
     boxShadow: "0 10px 30px rgba(0,0,0,0.4)",
   },
 
-  /* SIDEBAR */
   sidebar: {
     position: "fixed",
     top: 0,
@@ -123,7 +116,6 @@ const styles = {
     transition: "transform 0.35s ease",
   },
 
-  /* PROFILE */
   profile: {
     display: "flex",
     flexDirection: "column",
@@ -163,7 +155,6 @@ const styles = {
     color: "#cbd5f5",
   },
 
-  /* MENU */
   menu: {
     display: "flex",
     flexDirection: "column",

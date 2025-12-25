@@ -134,11 +134,13 @@ function Employees() {
     terminatedEmployees: 0,
   });
 
+  /* ================= FETCH EMPLOYEES ================= */
+
   const getEmployees = useCallback(async () => {
     try {
       setLoading(true);
-      const res = await api.get("/api/employees");
-      setEmployeesData(res.data);
+      const res = await api.get("/employees"); // ✅ FIXED
+      setEmployeesData(Array.isArray(res.data) ? res.data : []);
     } catch (err) {
       if (err.response?.status === 401) {
         localStorage.removeItem("token");
@@ -148,6 +150,8 @@ function Employees() {
       setLoading(false);
     }
   }, [navigate]);
+
+  /* ================= FETCH STATS ================= */
 
   const getEmployeesStats = useCallback(async () => {
     try {
@@ -198,30 +202,22 @@ function Employees() {
             <div style={styles.statsGrid}>
               <div style={styles.statBox}>
                 <div style={styles.statLabel}>Total</div>
-                <div style={styles.statValue}>
-                  {employeesStats.totalEmployees}
-                </div>
+                <div style={styles.statValue}>{employeesStats.totalEmployees}</div>
               </div>
 
               <div style={styles.statBox}>
                 <div style={styles.statLabel}>Active</div>
-                <div style={styles.statValue}>
-                  {employeesStats.activeEmployees}
-                </div>
+                <div style={styles.statValue}>{employeesStats.activeEmployees}</div>
               </div>
 
               <div style={styles.statBox}>
                 <div style={styles.statLabel}>Inactive</div>
-                <div style={styles.statValue}>
-                  {employeesStats.inActiveEmployees}
-                </div>
+                <div style={styles.statValue}>{employeesStats.inActiveEmployees}</div>
               </div>
 
               <div style={styles.statBox}>
                 <div style={styles.statLabel}>Terminated</div>
-                <div style={styles.statValue}>
-                  {employeesStats.terminatedEmployees}
-                </div>
+                <div style={styles.statValue}>{employeesStats.terminatedEmployees}</div>
               </div>
             </div>
           </div>
@@ -270,7 +266,7 @@ function Employees() {
                     </Tr>
                   ) : (
                     employeesData.map((emp) => (
-                      <Tr key={emp._id} _hover={{ bg: "rgba(255,255,255,0.08)" }}>
+                      <Tr key={emp._id}>
                         <Td style={styles.tableText}>
                           {emp.firstName} {emp.lastName}
                         </Td>

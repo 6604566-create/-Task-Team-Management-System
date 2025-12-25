@@ -10,13 +10,13 @@ const taskSchema = new Schema(
 
     description: {
       type: String,
-      required: true,
       trim: true,
+      default: "",
     },
 
     assignTo: {
       type: Schema.Types.ObjectId,
-      ref: "Employee",
+      ref: "Employee", // ✅ must match Employee model name
       required: true,
     },
 
@@ -49,11 +49,11 @@ const taskSchema = new Schema(
     priority: {
       type: String,
       enum: ["Most Important", "Important", "Least Important"],
-      required: true,
+      default: "Important",
     },
   },
   {
-    timestamps: true, // ✅ REQUIRED for createdAt & updatedAt
+    timestamps: true, // ✅ createdAt & updatedAt
   }
 );
 

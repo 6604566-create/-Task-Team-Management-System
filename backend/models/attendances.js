@@ -4,7 +4,7 @@ const attendanceSchema = new mongoose.Schema(
   {
     employee: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User", // ✅ MUST MATCH YOUR USER MODEL
+      ref: "User",
       required: true,
     },
 
@@ -29,8 +29,11 @@ const attendanceSchema = new mongoose.Schema(
     },
   },
   {
-    timestamps: true, // ✅ IMPORTANT
+    timestamps: true,
   }
 );
+
+// ✅ Prevent duplicate attendance per day
+attendanceSchema.index({ employee: 1, day: 1 }, { unique: true });
 
 export default mongoose.model("Attendance", attendanceSchema);

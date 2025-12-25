@@ -1,277 +1,288 @@
-import React, { useState, useEffect } from "react";
-import Navbar from "../../components/navbar/Navbar";
-import Sidenav from "../../components/sidenav/Sidenav";
+import React, { useEffect, useState } from "react";
 
+/* COMPONENTS */
+import Sidenav from "../../components/sidenav/Sidenav";
+import Navbar from "../../components/navbar/Navbar";
+
+/* MODALS */
+import AddTaskModal from "../tasks/modals/AddTask";
+import ReadTaskModal from "../tasks/modals/ReadTask";
+
+/* API */
+import api from "../../api/axios";
+
+/* CHAKRA UI */
 import {
-  Table,
-  Thead,
-  Tbody,
-  Tr,
-  Th,
-  Td,
-  TableContainer,
-  Spinner,
+  Box,
+  Flex,
+  Grid,
+  Text,
+  Button,
   Badge,
+  CircularProgress,
+  CircularProgressLabel,
+  Spinner,
 } from "@chakra-ui/react";
 
-import { IoMdAdd } from "react-icons/io";
+/* ICONS */
 import { FcStatistics } from "react-icons/fc";
-
-import AddTimesheetModal from "./modals/AddTimesheet";
-import api from "../../api/axios";
+import { IoReaderOutline } from "react-icons/io5";
+import { IoMdAdd } from "react-icons/io";
 
 /* ================= COMPONENT ================= */
 
-function Timesheets() {
-  const [isAddTimesheetOpen, setIsAddTimesheetOpen] = useState(false);
-  const [timesheets, setTimesheets] = useState([]);
+function Tasks() {
+  const [tasks, setTasks] = useState([]);
+  const [selectedTask, setSelectedTask] = useState(null);
+
+  const [isAddTaskOpen, setIsAddTaskOpen] = useState(false);
+  const [isReadTaskOpen, setIsReadTaskOpen] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  const [stats, setStats] = useState({
-    totalTimesheets: 0,
-    developmentType: 0,
-    testType: 0,
-    otherType: 0,
-  });
+  /* ================= FETCH TASKS ================= */
 
-  /* FETCH TIMESHEETS */
-  const fetchTimesheets = async () => {
+  const fetchTasks = async () => {
     try {
       setLoading(true);
-      const res = await api.get("/timesheets");
-      setTimesheets(Array.isArray(res.data) ? res.data : []);
+      const res = await api.get("/tasks"); // ✅ CONSISTENT
+      setTasks(Array.isArray(res.data) ? res.data : []);
     } catch (err) {
-      console.error("Fetch timesheets error:", err);
+      console.error("Fetch tasks error:", err);
     } finally {
       setLoading(false);
     }
   };
 
-  /* FETCH STATS */
-  const fetchStats = async () => {
+  useEffect(() => {
+    fetchTasks();
+  }, []);
+
+  /* ================= DELETE TASK ================= */
+
+  const handleDeleteTask = async (id) => {
     try {
-      const res = await api.get("/timesheets-stats");
-      setStats({
-        totalTimesheets: res.data?.totalTimesheets ?? 0,
-        developmentType: res.data?.developmentType ?? 0,
-        testType: res.data?.testType ?? 0,
-        otherType: res.data?.otherType ?? 0,
-      });
+      await api.delete(`/tasks/${id}`);
+      setTasks((prev) => prev.filter((t) => t._id !== id));
+      setIsReadTaskOpen(false);
     } catch (err) {
-      console.error("Fetch stats error:", err);
+      console.error("Delete task error:", err);
     }
   };
 
-  useEffect(() => {
-    fetchTimesheets();
-    fetchStats();
-  }, []);
+  /* ================= STATS ================= */
+
+  const total = tasks.length;
+  const completed = tasks.filter((t) => t.progress === 100).length;
+  const pending = total - completed;
+
+  /* ================= UI ================= */
 
   return (
     <>
-      <AddTimesheetModal
-        isOpen={isAddTimesheetOpen}
+      {/* MODALS */}
+      <AddTaskModal
+        isOpen={isAddTaskOpen}
         onClose={() => {
-          setIsAddTimesheetOpen(false);
-          fetchTimesheets();
-          fetchStats();
+          setIsAddTaskOpen(false);
+          fetchTasks();
         }}
       />
 
+      <ReadTaskModal
+        isOpen={isReadTaskOpen}
+        onClose={() => setIsReadTaskOpen(false)}
+        task={selectedTask}
+        onDelete={handleDeleteTask}
+      />
+
       {/* PAGE */}
-      <div style={styles.page}>
+      <Flex minH="100vh" bg="linear-gradient(135deg, #0f172a, #1e293b)">
         {/* SIDENAV */}
-        <div style={styles.sidebar}>
+        <Box w="240px">
           <Sidenav />
-        </div>
+        </Box>
 
         {/* CONTENT */}
-        <div style={styles.content}>
+        <Box flex="1" p={6} overflowY="auto">
           <Navbar />
 
           {/* STATS */}
-          <div style={styles.glassCard}>
-            <div style={styles.cardHeader}>
-              <FcStatistics />
-              <span>Timesheets Overview</span>
-            </div>
+          <Grid templateColumns="repeat(3, 1fr)" gap={6} mt={6}>
+            {[
+              { label: "Total Tasks", value: total, color: "#fff" },
+              { label: "Completed", value: completed, color: "#22c55e" },
+              { label: "Pending", value: pending, color: "#ef4444" },
+            ].map((stat) => (
+              <Box key={stat.label} sx={styles.glassCard}>
+                <Text fontSize="13px" color="#cbd5f5">
+                  {stat.label}
+                </Text>
+                <Text fontSize="28px" fontWeight="700" color={stat.color}>
+                  {stat.value}
+                </Text>
+              </Box>
+            ))}
+          </Grid>
 
-            <div style={styles.statsGrid}>
-              <Stat label="Total" value={stats.totalTimesheets} />
-              <Stat label="Development" value={stats.developmentType} />
-              <Stat label="Testing" value={stats.testType} />
-              <Stat label="Other" value={stats.otherType} />
-            </div>
-          </div>
+          {/* MAIN GRID */}
+          <Grid templateColumns="2fr 1fr" gap={6} mt={6}>
+            {/* TASK LIST */}
+            <Box sx={styles.glassCard}>
+              <Flex justify="space-between" align="center" mb={4}>
+                <Flex align="center" gap={2}>
+                  <FcStatistics />
+                  <Text fontWeight="600" color="#fff">
+                    Tasks
+                  </Text>
+                </Flex>
 
-          {/* TABLE */}
-          <div style={styles.glassCard}>
-            <div style={styles.tableHeader}>
-              <h3>Timesheets</h3>
-              <button
-                style={styles.primaryBtn}
-                onClick={() => setIsAddTimesheetOpen(true)}
-              >
-                <IoMdAdd /> Add Timesheet
-              </button>
-            </div>
+                <Button
+                  leftIcon={<IoMdAdd />}
+                  sx={styles.primaryBtn}
+                  onClick={() => setIsAddTaskOpen(true)}
+                >
+                  Add Task
+                </Button>
+              </Flex>
 
-            <TableContainer>
-              <Table variant="simple">
-                <Thead>
-                  <Tr>
-                    <Th color="#cbd5f5">Notes</Th>
-                    <Th color="#cbd5f5">Employee</Th>
-                    <Th color="#cbd5f5">Project</Th>
-                    <Th color="#cbd5f5">Task</Th>
-                    <Th color="#cbd5f5">Hours</Th>
-                    <Th color="#cbd5f5">Date</Th>
-                    <Th color="#cbd5f5">Type</Th>
-                  </Tr>
-                </Thead>
+              {/* CONTENT */}
+              {loading ? (
+                <Flex justify="center" py={10}>
+                  <Spinner color="pink.400" />
+                </Flex>
+              ) : tasks.length === 0 ? (
+                <Text color="#cbd5f5" textAlign="center">
+                  No tasks yet. Add your first task 🚀
+                </Text>
+              ) : (
+                <Flex direction="column" gap={4}>
+                  {tasks.map((task) => (
+                    <Box
+                      key={task._id}
+                      sx={styles.taskCard}
+                      _hover={{ transform: "translateY(-3px)" }}
+                    >
+                      <Flex justify="space-between" align="center" mb={2}>
+                        <Text fontWeight="600" color="#fff">
+                          {task.title}
+                        </Text>
 
-                <Tbody>
-                  {loading ? (
-                    <Tr>
-                      <Td colSpan={7} textAlign="center">
-                        <Spinner />
-                      </Td>
-                    </Tr>
-                  ) : timesheets.length === 0 ? (
-                    <Tr>
-                      <Td colSpan={7} textAlign="center" color="#cbd5f5">
-                        No timesheets found
-                      </Td>
-                    </Tr>
-                  ) : (
-                    timesheets.map((ts) => (
-                      <Tr key={ts._id}>
-                        <Td color="#fff">{ts.notes || "—"}</Td>
-                        <Td color="#fff">
-                          {ts.employee
-                            ? `${ts.employee.firstName} ${ts.employee.lastName}`
-                            : "—"}
-                        </Td>
-                        <Td color="#fff">{ts.project?.title || "—"}</Td>
-                        <Td color="#fff">{ts.task?.title || "—"}</Td>
-                        <Td color="#fff">{ts.timeSpent ?? 0} hrs</Td>
-                        <Td color="#fff">
-                          {ts.workDate
-                            ? new Date(ts.workDate).toLocaleDateString()
-                            : "—"}
-                        </Td>
-                        <Td>
-                          <Badge colorScheme="purple">
-                            {ts.type || "—"}
-                          </Badge>
-                        </Td>
-                      </Tr>
-                    ))
-                  )}
-                </Tbody>
-              </Table>
-            </TableContainer>
-          </div>
-        </div>
-      </div>
+                        <IoReaderOutline
+                          style={{ cursor: "pointer", color: "#fff" }}
+                          onClick={() => {
+                            setSelectedTask(task);
+                            setIsReadTaskOpen(true);
+                          }}
+                        />
+                      </Flex>
+
+                      <Text fontSize="13px" color="#cbd5f5" noOfLines={2}>
+                        {task.description}
+                      </Text>
+
+                      <Flex justify="space-between" align="center" mt={3}>
+                        <Badge
+                          colorScheme={
+                            task.priority === "Most Important"
+                              ? "red"
+                              : task.priority === "Important"
+                              ? "yellow"
+                              : "green"
+                          }
+                        >
+                          {task.priority}
+                        </Badge>
+
+                        <Text fontSize="11px" color="#94a3b8">
+                          {task.createdAt
+                            ? new Date(task.createdAt).toLocaleDateString(
+                                "en-IN",
+                                {
+                                  day: "2-digit",
+                                  month: "short",
+                                  year: "numeric",
+                                }
+                              )
+                            : "N/A"}
+                        </Text>
+                      </Flex>
+                    </Box>
+                  ))}
+                </Flex>
+              )}
+            </Box>
+
+            {/* PROGRESS */}
+            <Box sx={styles.glassCard} textAlign="center">
+              <Text fontWeight="600" color="#fff" mb={4}>
+                Task Progress
+              </Text>
+
+              <Flex justify="space-around">
+                <Box>
+                  <CircularProgress
+                    value={total ? (completed / total) * 100 : 0}
+                    color="green.400"
+                  >
+                    <CircularProgressLabel color="#fff">
+                      {total ? Math.round((completed / total) * 100) : 0}%
+                    </CircularProgressLabel>
+                  </CircularProgress>
+                  <Text mt={2} color="#cbd5f5">
+                    Completed
+                  </Text>
+                </Box>
+
+                <Box>
+                  <CircularProgress
+                    value={total ? (pending / total) * 100 : 0}
+                    color="red.400"
+                  >
+                    <CircularProgressLabel color="#fff">
+                      {total ? Math.round((pending / total) * 100) : 0}%
+                    </CircularProgressLabel>
+                  </CircularProgress>
+                  <Text mt={2} color="#cbd5f5">
+                    Pending
+                  </Text>
+                </Box>
+              </Flex>
+            </Box>
+          </Grid>
+        </Box>
+      </Flex>
     </>
   );
 }
 
-/* ================= STAT COMPONENT ================= */
-function Stat({ label, value }) {
-  return (
-    <div style={styles.statBox}>
-      <span style={styles.statLabel}>{label}</span>
-      <span style={styles.statValue}>{value}</span>
-    </div>
-  );
-}
-
-export default Timesheets;
+export default Tasks;
 
 /* ================= STYLES ================= */
 
 const styles = {
-  page: {
-    display: "flex",
-    minHeight: "100vh",
-    background: "linear-gradient(135deg, #0f172a, #1e293b)",
-    fontFamily: "Inter, sans-serif",
-  },
-
-  sidebar: {
-    width: "240px",
-  },
-
-  content: {
-    flex: 10,
-    padding: "24px",
-    overflowY: "auto",
-  },
-
   glassCard: {
     background: "rgba(255,255,255,0.12)",
     backdropFilter: "blur(18px)",
     borderRadius: "20px",
     padding: "24px",
-    marginBottom: "24px",
     boxShadow: "0 30px 60px rgba(0,0,0,0.45)",
     border: "1px solid rgba(255,255,255,0.15)",
   },
 
-  cardHeader: {
-    display: "flex",
-    alignItems: "center",
-    gap: "8px",
-    fontWeight: 600,
-    color: "#fff",
-    marginBottom: "16px",
-  },
-
-  statsGrid: {
-    display: "grid",
-    gridTemplateColumns: "repeat(4, 1fr)",
-    gap: "16px",
-  },
-
-  statBox: {
+  taskCard: {
     background: "rgba(255,255,255,0.15)",
+    backdropFilter: "blur(14px)",
     borderRadius: "16px",
     padding: "16px",
-    textAlign: "center",
-  },
-
-  statLabel: {
-    fontSize: "22px",
-    side: "block",
-    color: "#cbd5f5",
-  },
-
-  statValue: {
-    fontSize: "20px",
-    fontWeight: 700,
-    color: "#fff",
-  },
-
-  tableHeader: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: "16px",
-    color: "#fff",
+    boxShadow: "0 20px 40px rgba(0,0,0,0.35)",
+    transition: "transform 0.3s ease",
   },
 
   primaryBtn: {
-    display: "flex",
-    alignItems: "center",
-    gap: "6px",
     background: "#ec4899",
     color: "#fff",
-    border: "none",
-    padding: "8px 16px",
     borderRadius: "30px",
-    cursor: "pointer",
-    fontWeight: 600,
+    padding: "8px 18px",
+    _hover: { bg: "#db2777" },
   },
 };

@@ -28,9 +28,7 @@ const styles = {
     fontFamily: "Inter, sans-serif",
   },
 
-  sidebar: {
-    width: "240px",
-  },
+  sidebar: { width: "240px" },
 
   content: {
     flex: 1,
@@ -67,19 +65,11 @@ const styles = {
     padding: "18px",
     borderRadius: "16px",
     background: "rgba(255,255,255,0.15)",
-    backdropFilter: "blur(12px)",
     textAlign: "center",
   },
 
-  statValue: {
-    fontSize: "26px",
-    fontWeight: 700,
-  },
-
-  statLabel: {
-    fontSize: "13px",
-    color: "#cbd5f5",
-  },
+  statValue: { fontSize: "26px", fontWeight: 700 },
+  statLabel: { fontSize: "13px", color: "#cbd5f5" },
 
   grid: {
     display: "grid",
@@ -104,6 +94,7 @@ const styles = {
     display: "grid",
     gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))",
     gap: "18px",
+    marginTop: "16px",
   },
 
   projectCard: {
@@ -114,11 +105,7 @@ const styles = {
     boxShadow: "0 20px 40px rgba(0,0,0,0.35)",
   },
 
-  projectTitle: {
-    fontSize: "16px",
-    fontWeight: 600,
-  },
-
+  projectTitle: { fontSize: "16px", fontWeight: 600 },
   projectDesc: {
     fontSize: "13px",
     color: "#cbd5f5",
@@ -133,11 +120,15 @@ const styles = {
 
   progressCard: {
     background: "rgba(255,255,255,0.15)",
-    backdropFilter: "blur(16px)",
     borderRadius: "20px",
     padding: "24px",
     textAlign: "center",
-    boxShadow: "0 30px 60px rgba(0,0,0,0.45)",
+  },
+
+  empty: {
+    padding: "40px",
+    textAlign: "center",
+    color: "#cbd5f5",
   },
 };
 
@@ -152,11 +143,13 @@ function Projects() {
   const [isAddProjectModalOpen, setIsAddProjectModalOpen] = useState(false);
   const [isReadProjectModalOpen, setIsReadProjectModalOpen] = useState(false);
 
+  /* ================= FETCH PROJECTS ================= */
+
   const fetchProjects = useCallback(async () => {
     try {
-      const res = await api.get("/api/projects");
-      setProjects(res.data);
-    } catch {
+      const res = await api.get("/projects"); // ✅ CORRECT
+      setProjects(Array.isArray(res.data) ? res.data : []);
+    } catch (err) {
       localStorage.removeItem("token");
       navigate("/", { replace: true });
     }
@@ -166,14 +159,18 @@ function Projects() {
     fetchProjects();
   }, [fetchProjects]);
 
+  /* ================= DELETE ================= */
+
   const handleDeleteProject = async (id) => {
     try {
-      await api.delete(`/api/projects/${id}`);
+      await api.delete(`/projects/${id}`); // ✅ CORRECT
       setProjects((prev) => prev.filter((p) => p._id !== id));
     } catch (err) {
-      console.error(err);
+      console.error("Delete project error:", err);
     }
   };
+
+  /* ================= STATS ================= */
 
   const total = projects.length;
   const completed = projects.filter((p) => p.status === "Completed").length;
@@ -229,13 +226,13 @@ function Projects() {
 
           {/* MAIN GRID */}
           <div style={styles.grid}>
-            {/* PROJECTS */}
+            {/* LEFT */}
             <div>
               <div
                 style={{
                   display: "flex",
                   justifyContent: "space-between",
-                  marginBottom: "16px",
+                  alignItems: "center",
                 }}
               >
                 <h2>Projects</h2>
@@ -247,50 +244,48 @@ function Projects() {
                 </button>
               </div>
 
-              <div style={styles.projectGrid}>
-                {projects.map((project) => (
-                  <div key={project._id} style={styles.projectCard}>
-                    <h3 style={styles.projectTitle}>{project.title}</h3>
+              {projects.length === 0 ? (
+                <div style={styles.empty}>📁 No projects found</div>
+              ) : (
+                <div style={styles.projectGrid}>
+                  {projects.map((project) => (
+                    <div key={project._id} style={styles.projectCard}>
+                      <h3 style={styles.projectTitle}>{project.title}</h3>
 
-                    <p style={styles.projectDesc}>
-                      {project.description.slice(0, 80)}...
-                    </p>
+                      <p style={styles.projectDesc}>
+                        {(project.description || "").slice(0, 80)}…
+                      </p>
 
-                    <div
-                      style={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "center",
-                      }}
-                    >
-                      <Tag
-                        colorScheme={
-                          project.priority === "Most Important"
-                            ? "red"
-                            : project.priority === "Important"
-                            ? "yellow"
-                            : "green"
-                        }
-                      >
-                        {project.priority}
-                      </Tag>
-
-                      <IoReaderOutline
-                        style={{ fontSize: "20px", cursor: "pointer" }}
-                        onClick={() => {
-                          setSelectedProject(project);
-                          setIsReadProjectModalOpen(true);
+                      <div
+                        style={{
+                          display: "flex",
+                          justifyContent: "space-between",
+                          alignItems: "center",
                         }}
-                      />
-                    </div>
+                      >
+                        <Tag>{project.priority}</Tag>
 
-                    <p style={styles.dateText}>
-                      📅{" "}
-                      {new Date(project.createdAt).toLocaleDateString("en-IN")}
-                    </p>
-                  </div>
-                ))}
-              </div>
+                        <IoReaderOutline
+                          style={{ cursor: "pointer", fontSize: "18px" }}
+                          onClick={() => {
+                            setSelectedProject(project);
+                            setIsReadProjectModalOpen(true);
+                          }}
+                        />
+                      </div>
+
+                      <p style={styles.dateText}>
+                        📅{" "}
+                        {project.createdAt
+                          ? new Date(project.createdAt).toLocaleDateString(
+                              "en-IN"
+                            )
+                          : "N/A"}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* RIGHT */}

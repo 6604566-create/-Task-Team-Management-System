@@ -1,7 +1,7 @@
 import { Router } from "express";
 import authMiddleware from "../middleware/auth.js";
 
-import User from "../models/users.js";
+import Employee from "../models/employees.js";
 import Project from "../models/projects.js";
 import Task from "../models/tasks.js";
 
@@ -11,28 +11,32 @@ const router = Router();
 
 router.get("/dashboard", authMiddleware, async (req, res) => {
   try {
-    // EMPLOYEES
-    const totalEmployees = await User.countDocuments();
-    const activeEmployees = await User.countDocuments({ status: "Active" });
+    /* ===== EMPLOYEES ===== */
+    const totalEmployees = await Employee.countDocuments();
+    const activeEmployees = await Employee.countDocuments({
+      status: "Active",
+    });
 
-    // PROJECTS
+    /* ===== PROJECTS ===== */
     const totalProjects = await Project.countDocuments();
     const completedProjects = await Project.countDocuments({
       status: "Completed",
     });
 
-    // TASKS
+    /* ===== TASKS ===== */
     const totalTasks = await Task.countDocuments();
-    const completedTasks = await Task.countDocuments({ progress: 100 });
+    const completedTasks = await Task.countDocuments({
+      status: "Completed",
+    });
 
-    // PERCENTAGES
+    /* ===== PERCENTAGES ===== */
     const activePercentage = totalEmployees
       ? Math.round((activeEmployees / totalEmployees) * 100)
       : 0;
 
     const inactivePercentage = 100 - activePercentage;
 
-    // RESPONSE
+    /* ===== RESPONSE ===== */
     res.status(200).json({
       totalEmployees,
       activeEmployees,
@@ -45,7 +49,9 @@ router.get("/dashboard", authMiddleware, async (req, res) => {
     });
   } catch (error) {
     console.error("Dashboard error:", error);
-    res.status(500).json({ message: "Dashboard fetch failed" });
+    res.status(500).json({
+      message: "Dashboard fetch failed",
+    });
   }
 });
 

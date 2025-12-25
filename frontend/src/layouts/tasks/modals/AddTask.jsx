@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import {
   Modal,
   ModalOverlay,
@@ -14,33 +14,39 @@ import {
   Select,
   Spinner,
   useToast,
-} from '@chakra-ui/react';
+} from "@chakra-ui/react";
 
-import api from '../../../api/axios';
+import api from "../../../api/axios";
+
+/* ================= CONSTANTS ================= */
 
 const PRIORITY_COLORS = {
-  'Most Important': 'red',
-  Important: 'yellow',
-  'Least Important': 'green',
+  "Most Important": "red",
+  Important: "yellow",
+  "Least Important": "green",
 };
+
+/* ================= COMPONENT ================= */
 
 function AddTaskModal({ isOpen, onClose }) {
   const toast = useToast();
 
   const [loading, setLoading] = useState(false);
-  const [employeesData, setEmployeesData] = useState([]);
-  const [projectsData, setProjectsData] = useState([]);
+  const [employees, setEmployees] = useState([]);
+  const [projects, setProjects] = useState([]);
 
   const initialState = {
-    title: '',
-    description: '',
-    assignTo: '',
-    project: '',
-    startDate: '',
-    priority: 'Most Important',
+    title: "",
+    description: "",
+    assignTo: "",
+    project: "",
+    startDate: "",
+    priority: "Most Important",
   };
 
   const [formData, setFormData] = useState(initialState);
+
+  /* ================= HANDLERS ================= */
 
   const handleChange = (e) =>
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -48,15 +54,32 @@ function AddTaskModal({ isOpen, onClose }) {
   const handlePriorityClick = (priority) =>
     setFormData({ ...formData, priority });
 
-  // ================= FETCH DATA =================
+  /* ================= FETCH DATA ================= */
+
   const fetchEmployees = async () => {
-    const res = await api.get('/employees');
-    setEmployeesData(res.data);
+    try {
+      const res = await api.get("/employees");
+      setEmployees(Array.isArray(res.data) ? res.data : []);
+    } catch (err) {
+      toast({
+        title: "Failed to load employees",
+        status: "error",
+        position: "top",
+      });
+    }
   };
 
   const fetchProjects = async () => {
-    const res = await api.get('/projects');
-    setProjectsData(res.data);
+    try {
+      const res = await api.get("/projects");
+      setProjects(Array.isArray(res.data) ? res.data : []);
+    } catch (err) {
+      toast({
+        title: "Failed to load projects",
+        status: "error",
+        position: "top",
+      });
+    }
   };
 
   useEffect(() => {
@@ -68,18 +91,19 @@ function AddTaskModal({ isOpen, onClose }) {
     }
   }, [isOpen]);
 
-  // ================= SUBMIT =================
+  /* ================= SUBMIT ================= */
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
 
     try {
-      const res = await api.post('/task', formData);
+      const res = await api.post("/task", formData);
 
       toast({
-        title: res.data.message || 'Task added successfully',
-        status: 'success',
-        position: 'top',
+        title: res.data?.message || "Task added successfully",
+        status: "success",
+        position: "top",
         duration: 4000,
         isClosable: true,
       });
@@ -88,9 +112,9 @@ function AddTaskModal({ isOpen, onClose }) {
       onClose();
     } catch (err) {
       toast({
-        title: err.response?.data?.message || 'Failed to add task',
-        status: 'error',
-        position: 'top',
+        title: err.response?.data?.message || "Failed to add task",
+        status: "error",
+        position: "top",
         duration: 4000,
         isClosable: true,
       });
@@ -98,6 +122,8 @@ function AddTaskModal({ isOpen, onClose }) {
       setLoading(false);
     }
   };
+
+  /* ================= UI ================= */
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} size="xl" isCentered>
@@ -135,9 +161,9 @@ function AddTaskModal({ isOpen, onClose }) {
               onChange={handleChange}
               required
             >
-              {employeesData.map((e) => (
-                <option key={e._id} value={e._id}>
-                  {e.firstName} {e.lastName}
+              {employees.map((emp) => (
+                <option key={emp._id} value={emp._id}>
+                  {emp.firstName} {emp.lastName}
                 </option>
               ))}
             </Select>
@@ -150,9 +176,9 @@ function AddTaskModal({ isOpen, onClose }) {
               onChange={handleChange}
               required
             >
-              {projectsData.map((p) => (
-                <option key={p._id} value={p._id}>
-                  {p.title}
+              {projects.map((proj) => (
+                <option key={proj._id} value={proj._id}>
+                  {proj.title}
                 </option>
               ))}
             </Select>
@@ -166,18 +192,25 @@ function AddTaskModal({ isOpen, onClose }) {
               required
             />
 
-            {/* Priority */}
-            <div className="priority-container">
+            {/* PRIORITY */}
+            <div
+              style={{
+                display: "flex",
+                gap: "10px",
+                marginTop: "15px",
+                alignItems: "center",
+              }}
+            >
               <p>Priority:</p>
               {Object.keys(PRIORITY_COLORS).map((p) => (
                 <Tag
                   key={p}
                   size="lg"
                   cursor="pointer"
-                  colorScheme={
-                    formData.priority === p ? PRIORITY_COLORS[p] : 'gray'
-                  }
                   borderRadius="full"
+                  colorScheme={
+                    formData.priority === p ? PRIORITY_COLORS[p] : "gray"
+                  }
                   onClick={() => handlePriorityClick(p)}
                 >
                   {p}
@@ -190,8 +223,9 @@ function AddTaskModal({ isOpen, onClose }) {
             <Button mr={3} onClick={onClose} disabled={loading}>
               Close
             </Button>
+
             <Button type="submit" colorScheme="teal" disabled={loading}>
-              {loading ? <Spinner size="sm" /> : 'Add Task'}
+              {loading ? <Spinner size="sm" /> : "Add Task"}
             </Button>
           </ModalFooter>
         </form>

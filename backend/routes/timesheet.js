@@ -1,4 +1,5 @@
 import { Router } from "express";
+import mongoose from "mongoose";
 import authMiddleware from "../middleware/auth.js";
 import Timesheet from "../models/timesheets.js";
 
@@ -8,28 +9,28 @@ const router = Router();
 router.post("/timesheet", authMiddleware, async (req, res) => {
   try {
     const {
-      notes,
+      notes = "",
       employee,
       project,
       task,
-      progress,
+      progress = 0,
       timeSpent,
       workDate,
       type,
     } = req.body;
 
     if (!employee || !project || !task) {
-      return res
-        .status(400)
-        .json({ message: "Employee, Project and Task are required" });
+      return res.status(400).json({
+        message: "Employee, Project and Task are required",
+      });
     }
 
     if (!workDate) {
       return res.status(400).json({ message: "Work date is required" });
     }
 
-    if (!timeSpent) {
-      return res.status(400).json({ message: "Time spent is required" });
+    if (timeSpent === undefined || timeSpent < 0) {
+      return res.status(400).json({ message: "Valid time spent is required" });
     }
 
     if (!["Development", "Testing", "Other"].includes(type)) {
@@ -73,18 +74,28 @@ router.get("/timesheets", authMiddleware, async (req, res) => {
   }
 });
 
-/* ================= TIMESHEET STATS ================= */
-router.get("/stats", authMiddleware, async (req, res) => {
+/* ================= TIMESHEET STATS (FIXED) ================= */
+router.get("/timesheets-stats", authMiddleware, async (req, res) => {
   try {
-    const total = await Timesheet.countDocuments();
+    const totalTimesheets = await Timesheet.countDocuments();
 
-    const totalHoursAgg = await Timesheet.aggregate([
-      { $group: { _id: null, totalHours: { $sum: "$timeSpent" } } },
-    ]);
+    const developmentType = await Timesheet.countDocuments({
+      type: "Development",
+    });
+
+    const testType = await Timesheet.countDocuments({
+      type: "Testing",
+    });
+
+    const otherType = await Timesheet.countDocuments({
+      type: "Other",
+    });
 
     res.status(200).json({
-      total,
-      totalHours: totalHoursAgg[0]?.totalHours || 0,
+      totalTimesheets,
+      developmentType,
+      testType,
+      otherType,
     });
   } catch (error) {
     console.error("Timesheet Stats Error:", error);

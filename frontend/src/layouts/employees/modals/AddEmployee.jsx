@@ -20,7 +20,6 @@ function AddEmployeeModal({ isOpen, onClose }) {
   const toast = useToast();
   const [loading, setLoading] = useState(false);
 
-  // ❌ No employeeId here (backend will auto-generate _id)
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -66,7 +65,6 @@ function AddEmployeeModal({ isOpen, onClose }) {
         isClosable: true,
       });
 
-      // Reset form
       setFormData({
         firstName: "",
         lastName: "",
@@ -113,7 +111,7 @@ function AddEmployeeModal({ isOpen, onClose }) {
             <Input mt={3} name="firstName" placeholder="First Name" value={formData.firstName} onChange={handleChange} required />
             <Input mt={3} name="lastName" placeholder="Last Name" value={formData.lastName} onChange={handleChange} required />
             <Input mt={3} type="email" name="email" placeholder="Email" value={formData.email} onChange={handleChange} required />
-            <Input mt={3} type="number" name="phone" placeholder="Phone" value={formData.phone} onChange={handleChange} required />
+            <Input mt={3} type="text" name="phone" placeholder="Phone" value={formData.phone} onChange={handleChange} required />
             <Input mt={3} name="residentialAddress" placeholder="Residential Address" value={formData.residentialAddress} onChange={handleChange} required />
             <Input mt={3} name="cnic" placeholder="CNIC" value={formData.cnic} onChange={handleChange} required />
             <Input mt={3} name="role" placeholder="Role" value={formData.role} onChange={handleChange} required />
@@ -159,8 +157,8 @@ function AddEmployeeModal({ isOpen, onClose }) {
             <Button mr={3} onClick={onClose}>
               Close
             </Button>
-            <Button type="submit" colorScheme="teal">
-              {loading ? <Spinner /> : "Add Employee"}
+            <Button type="submit" colorScheme="teal" isDisabled={loading}>
+              {loading ? <Spinner size="sm" /> : "Add Employee"}
             </Button>
           </ModalFooter>
         </form>

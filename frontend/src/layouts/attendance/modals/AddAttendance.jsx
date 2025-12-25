@@ -15,6 +15,8 @@ import {
 
 import api from "../../../api/axios";
 
+/* ================= COMPONENT ================= */
+
 export default function AddAttendanceModal({ isOpen, onClose }) {
   const toast = useToast();
 
@@ -30,13 +32,15 @@ export default function AddAttendanceModal({ isOpen, onClose }) {
   const fetchEmployees = async () => {
     setLoadingEmployees(true);
     try {
-      const res = await api.get("https://task-team-management-system-1.onrender.com/api/employees");
-      setEmployees(res.data);
-    } catch {
+      const res = await api.get("/employees");
+      setEmployees(res.data || []);
+    } catch (error) {
       toast({
         title: "Failed to load employees",
         status: "error",
         position: "top",
+        duration: 4000,
+        isClosable: true,
       });
     } finally {
       setLoadingEmployees(false);
@@ -44,17 +48,20 @@ export default function AddAttendanceModal({ isOpen, onClose }) {
   };
 
   useEffect(() => {
-    if (isOpen) fetchEmployees();
-    else {
+    if (isOpen) {
+      fetchEmployees();
+    } else {
       setEmployeeId("");
       setAttendanceType("");
     }
   }, [isOpen]);
 
-  /* ================= DATE & TIME ================= */
+  /* ================= DATE & TIME HELPERS ================= */
 
-  const getCurrentDate = () =>
-    new Date().toISOString().split("T")[0]; // YYYY-MM-DD
+  const getCurrentDate = () => {
+    const d = new Date();
+    return `${d.getDate()}-${d.getMonth() + 1}-${d.getFullYear()}`;
+  };
 
   const getCurrentTime = () => {
     const d = new Date();
@@ -71,7 +78,7 @@ export default function AddAttendanceModal({ isOpen, onClose }) {
     setLoading(true);
 
     try {
-      await api.post("https://task-team-management-system-1.onrender.com/api/attendance", {
+      await api.post("/attendance", {
         employeeId,
         day: getCurrentDate(),
         timeIn: attendanceType === "time_in" ? getCurrentTime() : null,
@@ -82,6 +89,8 @@ export default function AddAttendanceModal({ isOpen, onClose }) {
         title: "Attendance marked successfully",
         status: "success",
         position: "top",
+        duration: 4000,
+        isClosable: true,
       });
 
       onClose();
@@ -91,11 +100,15 @@ export default function AddAttendanceModal({ isOpen, onClose }) {
           error.response?.data?.message || "Failed to mark attendance",
         status: "error",
         position: "top",
+        duration: 4000,
+        isClosable: true,
       });
     } finally {
       setLoading(false);
     }
   };
+
+  /* ================= UI ================= */
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} size="xl" isCentered>
@@ -106,6 +119,7 @@ export default function AddAttendanceModal({ isOpen, onClose }) {
           <ModalCloseButton />
 
           <ModalBody>
+            {/* EMPLOYEE */}
             <Select
               mt={3}
               placeholder={
@@ -125,6 +139,7 @@ export default function AddAttendanceModal({ isOpen, onClose }) {
               ))}
             </Select>
 
+            {/* ATTENDANCE TYPE */}
             <Select
               mt={3}
               placeholder="Attendance Type"

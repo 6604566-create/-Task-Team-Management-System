@@ -2,8 +2,8 @@ import axios from "axios";
 
 /**
  * BASE URL RULE:
- * - Local → http://localhost:8000/api
- * - Production → https://task-team-management-system-1.onrender.com/api
+ * - Local → http://localhost:8000
+ * - Production → VITE_API_URL (no /api here)
  */
 
 const api = axios.create({
@@ -33,9 +33,7 @@ api.interceptors.response.use(
   (error) => {
     if (error.response?.status === 401) {
       localStorage.removeItem("token");
-
-      // hard redirect to login
-      window.location.replace("/");
+      window.location.replace("/"); // redirect to login
     }
 
     return Promise.reject(error);

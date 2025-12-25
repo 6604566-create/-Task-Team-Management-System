@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
   Modal,
   ModalOverlay,
@@ -13,21 +13,21 @@ import {
   Tag,
   Spinner,
   useToast,
-} from '@chakra-ui/react';
+} from "@chakra-ui/react";
 
-import api from '../../../api/axios';
+import api from "../../../api/axios";
 
 function AddProjectModal({ isOpen, onClose }) {
   const toast = useToast();
   const [loading, setLoading] = useState(false);
 
   const [formData, setFormData] = useState({
-    title: '',
-    description: '',
-    clientName: '',
-    startDate: '',
-    status: 'On Hold',
-    priority: 'Most Important',
+    title: "",
+    description: "",
+    clientName: "",
+    startDate: "",
+    status: "On Hold",
+    priority: "Most Important",
   });
 
   const handleChange = (e) => {
@@ -47,31 +47,31 @@ function AddProjectModal({ isOpen, onClose }) {
     setLoading(true);
 
     try {
-      const response = await api.post('/project', formData);
+      const res = await api.post("/project", formData);
 
       toast({
-        title: response.data.message || 'Project added successfully',
-        status: 'success',
-        position: 'top',
+        title: res.data.message || "Project added successfully",
+        status: "success",
+        position: "top",
         duration: 4000,
         isClosable: true,
       });
 
       setFormData({
-        title: '',
-        description: '',
-        clientName: '',
-        startDate: '',
-        status: 'On Hold',
-        priority: 'Most Important',
+        title: "",
+        description: "",
+        clientName: "",
+        startDate: "",
+        status: "On Hold",
+        priority: "Most Important",
       });
 
       onClose();
     } catch (error) {
       toast({
-        title: error.response?.data?.message || 'Failed to add project',
-        status: 'error',
-        position: 'top',
+        title: error.response?.data?.message || "Failed to add project",
+        status: "error",
+        position: "top",
         duration: 4000,
         isClosable: true,
       });
@@ -105,8 +105,8 @@ function AddProjectModal({ isOpen, onClose }) {
             />
 
             <Textarea
-              rows={6}
               mt={3}
+              rows={5}
               placeholder="Description"
               name="description"
               value={formData.description}
@@ -132,38 +132,46 @@ function AddProjectModal({ isOpen, onClose }) {
               required
             />
 
-            {/* Status */}
-            <div className="priority-container">
+            {/* STATUS */}
+            <div style={{ marginTop: "16px" }}>
               <p>Status:</p>
-              {['On Hold', 'In Progress', 'Testing', 'Completed'].map((s) => (
-                <Tag
-                  key={s}
-                  size="lg"
-                  cursor="pointer"
-                  colorScheme={formData.status === s ? 'blue' : 'gray'}
-                  borderRadius="full"
-                  onClick={() => handleStatusClick(s)}
-                >
-                  {s}
-                </Tag>
-              ))}
+              <div style={{ display: "flex", gap: "10px", marginTop: "8px" }}>
+                {["On Hold", "In Progress", "Testing", "Completed"].map(
+                  (s) => (
+                    <Tag
+                      key={s}
+                      size="lg"
+                      cursor="pointer"
+                      borderRadius="full"
+                      colorScheme={formData.status === s ? "blue" : "gray"}
+                      onClick={() => handleStatusClick(s)}
+                    >
+                      {s}
+                    </Tag>
+                  )
+                )}
+              </div>
             </div>
 
-            {/* Priority */}
-            <div className="priority-container">
+            {/* PRIORITY */}
+            <div style={{ marginTop: "16px" }}>
               <p>Priority:</p>
-              {['Most Important', 'Important', 'Least Important'].map((p) => (
-                <Tag
-                  key={p}
-                  size="lg"
-                  cursor="pointer"
-                  colorScheme={formData.priority === p ? 'red' : 'gray'}
-                  borderRadius="full"
-                  onClick={() => handlePriorityClick(p)}
-                >
-                  {p}
-                </Tag>
-              ))}
+              <div style={{ display: "flex", gap: "10px", marginTop: "8px" }}>
+                {["Most Important", "Important", "Least Important"].map(
+                  (p) => (
+                    <Tag
+                      key={p}
+                      size="lg"
+                      cursor="pointer"
+                      borderRadius="full"
+                      colorScheme={formData.priority === p ? "red" : "gray"}
+                      onClick={() => handlePriorityClick(p)}
+                    >
+                      {p}
+                    </Tag>
+                  )
+                )}
+              </div>
             </div>
           </ModalBody>
 
@@ -171,8 +179,13 @@ function AddProjectModal({ isOpen, onClose }) {
             <Button mr={3} onClick={onClose}>
               Close
             </Button>
-            <Button type="submit" colorScheme="teal">
-              {loading ? <Spinner /> : 'Add Project'}
+
+            <Button
+              type="submit"
+              colorScheme="teal"
+              isDisabled={loading}
+            >
+              {loading ? <Spinner size="sm" /> : "Add Project"}
             </Button>
           </ModalFooter>
         </form>

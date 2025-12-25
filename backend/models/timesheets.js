@@ -10,22 +10,23 @@ const timesheetSchema = new Schema(
 
     employee: {
       type: Schema.Types.ObjectId,
-      ref: "Employee",
-      required: [true, "Employee is required"],
+      ref: "Employee", // ✅ must match Employee model
+      required: true,
     },
 
     project: {
       type: Schema.Types.ObjectId,
       ref: "Project",
-      required: [true, "Project is required"],
+      required: true,
     },
 
     task: {
       type: Schema.Types.ObjectId,
       ref: "Task",
-      required: [true, "Task is required"],
+      required: true,
     },
 
+    // 🔥 progress snapshot at time of logging
     progress: {
       type: Number,
       min: 0,
@@ -33,24 +34,27 @@ const timesheetSchema = new Schema(
       default: 0,
     },
 
+    // ⏱️ hours spent (decimal allowed: 1.5 hrs)
     timeSpent: {
       type: Number,
-      required: [true, "Time spent is required"],
-      min: [0, "Time spent cannot be negative"],
+      required: true,
+      min: 0,
     },
 
     workDate: {
       type: Date,
-      required: [true, "Work date is required"],
+      required: true,
     },
 
     type: {
       type: String,
       enum: ["Development", "Testing", "Other"],
-      required: [true, "Timesheet type is required"],
+      default: "Development", // ✅ safer default
     },
   },
-  { timestamps: true }
+  {
+    timestamps: true, // ✅ createdAt & updatedAt
+  }
 );
 
 export default model("Timesheet", timesheetSchema);

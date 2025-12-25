@@ -2,8 +2,6 @@ import { Schema, model } from "mongoose";
 
 const employeeSchema = new Schema(
   {
-    // ❌ REMOVED employee_id (MongoDB _id is enough)
-
     firstName: {
       type: String,
       required: true,
@@ -25,7 +23,7 @@ const employeeSchema = new Schema(
     },
 
     phone: {
-      type: String, // ✅ string, not number
+      type: String,
     },
 
     residentialAddress: {
@@ -41,6 +39,7 @@ const employeeSchema = new Schema(
 
     role: {
       type: String,
+      enum: ["Admin", "Manager", "Employee"],
       required: true,
     },
 
@@ -60,11 +59,15 @@ const employeeSchema = new Schema(
 
     gender: {
       type: String,
-      enum: ["Male", "Female"],
-      default: "Male",
+      enum: ["Male", "Female", "Other"],
+      default: "Other",
     },
   },
   { timestamps: true }
 );
+
+// Indexes
+employeeSchema.index({ email: 1 });
+employeeSchema.index({ cnic: 1 });
 
 export default model("Employee", employeeSchema);

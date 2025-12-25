@@ -11,6 +11,7 @@ import {
   Td,
   TableContainer,
   Badge,
+  Spinner,
 } from "@chakra-ui/react";
 
 import { IoMdAdd } from "react-icons/io";
@@ -23,13 +24,19 @@ function Attendance() {
   const [isAddAttendanceModalOpen, setIsAddAttendanceModalOpen] =
     useState(false);
   const [attendanceData, setAttendanceData] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  /* ================= FETCH ATTENDANCE ================= */
 
   const fetchAttendance = async () => {
     try {
-      const res = await api.get("/api/attendance");
+      setLoading(true);
+      const res = await api.get("/attendance"); // ✅ FIXED
       setAttendanceData(Array.isArray(res.data) ? res.data : []);
     } catch (err) {
       console.error("Attendance fetch error:", err);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -84,7 +91,13 @@ function Attendance() {
                 </Thead>
 
                 <Tbody>
-                  {attendanceData.length === 0 ? (
+                  {loading ? (
+                    <Tr>
+                      <Td colSpan={5} textAlign="center">
+                        <Spinner />
+                      </Td>
+                    </Tr>
+                  ) : attendanceData.length === 0 ? (
                     <Tr>
                       <Td colSpan={5} textAlign="center" color="#cbd5f5">
                         No attendance records found
