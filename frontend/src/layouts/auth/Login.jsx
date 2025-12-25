@@ -23,7 +23,7 @@ export default function Login() {
     setLoading(true);
 
     try {
-      const res = await axios.post("/api/login", formData);
+      const res = await axios.post("/login", formData);
       localStorage.setItem("token", res.data.token);
       navigate("/admin/dashboard", { replace: true });
     } catch (err) {

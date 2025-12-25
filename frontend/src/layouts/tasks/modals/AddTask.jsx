@@ -50,12 +50,12 @@ function AddTaskModal({ isOpen, onClose }) {
 
   // ================= FETCH DATA =================
   const fetchEmployees = async () => {
-    const res = await api.get('/api/employees');
+    const res = await api.get('/employees');
     setEmployeesData(res.data);
   };
 
   const fetchProjects = async () => {
-    const res = await api.get('/api/projects');
+    const res = await api.get('/projects');
     setProjectsData(res.data);
   };
 
@@ -74,7 +74,7 @@ function AddTaskModal({ isOpen, onClose }) {
     setLoading(true);
 
     try {
-      const res = await api.post('/api/task', formData);
+      const res = await api.post('/task', formData);
 
       toast({
         title: res.data.message || 'Task added successfully',

@@ -39,7 +39,7 @@ function Tasks() {
   /* FETCH TASKS */
   const fetchTasks = async () => {
     try {
-      const res = await api.get("/api/tasks");
+      const res = await api.get("/tasks");
       setTasks(res.data);
     } catch (err) {
       console.error("Fetch tasks error:", err);

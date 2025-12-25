@@ -47,7 +47,7 @@ function AddProjectModal({ isOpen, onClose }) {
     setLoading(true);
 
     try {
-      const response = await api.post('/api/project', formData);
+      const response = await api.post('/project', formData);
 
       toast({
         title: response.data.message || 'Project added successfully',

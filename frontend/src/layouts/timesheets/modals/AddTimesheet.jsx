@@ -58,9 +58,9 @@ function AddTimesheetModal({ isOpen, onClose }) {
   useEffect(() => {
     if (!isOpen) return;
 
-    api.get("/api/employees").then((res) => setEmployeesData(res.data));
-    api.get("/api/projects").then((res) => setProjectsData(res.data));
-    api.get("/api/tasks").then((res) => setTasksData(res.data));
+    api.get("/employees").then((res) => setEmployeesData(res.data));
+    api.get("/projects").then((res) => setProjectsData(res.data));
+    api.get("/tasks").then((res) => setTasksData(res.data));
   }, [isOpen]);
 
   /* ================= SUBMIT ================= */
@@ -92,9 +92,9 @@ function AddTimesheetModal({ isOpen, onClose }) {
         type,
       };
 
-      await api.post("/api/timesheet", payload);
+      await api.post("/timesheet", payload);
 
-      await api.patch(`/api/task/${task}/progress`, {
+      await api.patch(`/task/${task}/progress`, {
         progress: Number(formData.progress),
       });
 
