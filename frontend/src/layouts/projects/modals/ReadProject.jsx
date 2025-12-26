@@ -9,11 +9,28 @@ import {
   ModalCloseButton,
   Button,
   Tag,
+  IconButton,
 } from "@chakra-ui/react";
 import { MdDelete } from "react-icons/md";
 
+/* ================= COMPONENT ================= */
+
 function ReadProjectModal({ isOpen, onClose, project, onDelete }) {
-  if (!project) return null;
+  if (!project) {
+    return (
+      <Modal isOpen={isOpen} onClose={onClose} isCentered>
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>Project Details</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody>No project selected</ModalBody>
+          <ModalFooter>
+            <Button onClick={onClose}>Close</Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+    );
+  }
 
   const handleDelete = () => {
     const confirmDelete = window.confirm(
@@ -31,7 +48,9 @@ function ReadProjectModal({ isOpen, onClose, project, onDelete }) {
       ? "red"
       : project.priority === "Important"
       ? "yellow"
-      : "green";
+      : project.priority === "Least Important"
+      ? "green"
+      : "gray";
 
   return (
     <Modal
@@ -86,13 +105,14 @@ function ReadProjectModal({ isOpen, onClose, project, onDelete }) {
               }}
             >
               <Tag size="lg" colorScheme={priorityColor} borderRadius="full">
-                {project.priority}
+                {project.priority || "N/A"}
               </Tag>
 
-              <MdDelete
-                size={22}
-                style={{ cursor: "pointer", color: "#dc2626" }}
-                title="Delete Project"
+              <IconButton
+                icon={<MdDelete />}
+                colorScheme="red"
+                variant="ghost"
+                aria-label="Delete project"
                 onClick={handleDelete}
               />
             </div>
@@ -112,7 +132,7 @@ function ReadProjectModal({ isOpen, onClose, project, onDelete }) {
         </ModalBody>
 
         <ModalFooter>
-          <Button bg="darkcyan" color="white" onClick={onClose}>
+          <Button colorScheme="teal" onClick={onClose}>
             Close
           </Button>
         </ModalFooter>

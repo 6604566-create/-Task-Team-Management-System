@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import api from "../../api/axios";
+import fetchClient from "../../api/fetchClient";
 
 import girlImg from "../../assets/sigin/signup.png";
 
@@ -31,13 +31,16 @@ export default function Register() {
     setLoading(true);
 
     try {
-      // ✅ CORRECT API ROUTE (matches backend)
-      await api.post("/register", formData);
+      // ✅ fetchClient usage (NOT axios)
+      await fetchClient("/api/register", {
+        method: "POST",
+        body: formData,
+      });
 
-      // ✅ Redirect to login page
+      alert("Registration successful 🎉");
       navigate("/", { replace: true });
     } catch (err) {
-      alert(err.response?.data?.message || "Registration failed");
+      alert(err.message || "Registration failed");
     } finally {
       setLoading(false);
     }
@@ -60,7 +63,6 @@ export default function Register() {
               style={styles.input}
               type="text"
               name="firstName"
-              placeholder="Aditya"
               value={formData.firstName}
               onChange={handleChange}
               required
@@ -71,7 +73,6 @@ export default function Register() {
               style={styles.input}
               type="text"
               name="lastName"
-              placeholder="Raj"
               value={formData.lastName}
               onChange={handleChange}
               required
@@ -82,7 +83,6 @@ export default function Register() {
               style={styles.input}
               type="email"
               name="email"
-              placeholder="adityaraj@gmail.com"
               value={formData.email}
               onChange={handleChange}
               required
@@ -93,7 +93,6 @@ export default function Register() {
               style={styles.input}
               type="password"
               name="password"
-              placeholder="************"
               value={formData.password}
               onChange={handleChange}
               required

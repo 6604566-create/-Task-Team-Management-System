@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import api from "../../api/axios";
+import fetchClient from "../../api/fetchClient";
 
 import girlImg from "../../assets/sigin/girl.png";
 
@@ -29,16 +29,19 @@ export default function Login() {
     setLoading(true);
 
     try {
-      // ✅ CORRECT API ROUTE (matches backend)
-      const res = await api.post("/login", formData);
+      // ✅ fetchClient usage (FUNCTION, not axios)
+      const data = await fetchClient("/api/login", {
+        method: "POST",
+        body: formData,
+      });
 
       // ✅ Save token
-      localStorage.setItem("token", res.data.token);
+      localStorage.setItem("token", data.token);
 
-      // ✅ Redirect after login
+      // ✅ Redirect
       navigate("/admin/dashboard", { replace: true });
     } catch (err) {
-      alert(err.response?.data?.message || "Login failed");
+      alert(err.message || "Login failed");
     } finally {
       setLoading(false);
     }

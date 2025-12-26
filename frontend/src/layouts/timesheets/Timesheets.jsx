@@ -9,7 +9,7 @@ import AddTaskModal from "../tasks/modals/AddTask";
 import ReadTaskModal from "../tasks/modals/ReadTask";
 
 /* API */
-import api from "../../api/axios";
+import fetchClient from "../../api/fetchClient";
 
 /* CHAKRA UI */
 import {
@@ -44,10 +44,10 @@ function Tasks() {
   const fetchTasks = async () => {
     try {
       setLoading(true);
-      const res = await api.get("/tasks"); // ✅ CONSISTENT
-      setTasks(Array.isArray(res.data) ? res.data : []);
+      const data = await fetchClient("/tasks"); // ✅ FIXED
+      setTasks(Array.isArray(data) ? data : []);
     } catch (err) {
-      console.error("Fetch tasks error:", err);
+      console.error("Fetch tasks error:", err.message);
     } finally {
       setLoading(false);
     }
@@ -61,11 +61,13 @@ function Tasks() {
 
   const handleDeleteTask = async (id) => {
     try {
-      await api.delete(`/tasks/${id}`);
+      await fetchClient(`/tasks/${id}`, {
+        method: "DELETE",
+      });
       setTasks((prev) => prev.filter((t) => t._id !== id));
       setIsReadTaskOpen(false);
     } catch (err) {
-      console.error("Delete task error:", err);
+      console.error("Delete task error:", err.message);
     }
   };
 
@@ -145,7 +147,6 @@ function Tasks() {
                 </Button>
               </Flex>
 
-              {/* CONTENT */}
               {loading ? (
                 <Flex justify="center" py={10}>
                   <Spinner color="pink.400" />
@@ -157,11 +158,7 @@ function Tasks() {
               ) : (
                 <Flex direction="column" gap={4}>
                   {tasks.map((task) => (
-                    <Box
-                      key={task._id}
-                      sx={styles.taskCard}
-                      _hover={{ transform: "translateY(-3px)" }}
-                    >
+                    <Box key={task._id} sx={styles.taskCard}>
                       <Flex justify="space-between" align="center" mb={2}>
                         <Text fontWeight="600" color="#fff">
                           {task.title}
@@ -225,7 +222,10 @@ function Tasks() {
                     color="green.400"
                   >
                     <CircularProgressLabel color="#fff">
-                      {total ? Math.round((completed / total) * 100) : 0}%
+                      {total
+                        ? Math.round((completed / total) * 100)
+                        : 0}
+                      %
                     </CircularProgressLabel>
                   </CircularProgress>
                   <Text mt={2} color="#cbd5f5">
@@ -239,7 +239,10 @@ function Tasks() {
                     color="red.400"
                   >
                     <CircularProgressLabel color="#fff">
-                      {total ? Math.round((pending / total) * 100) : 0}%
+                      {total
+                        ? Math.round((pending / total) * 100)
+                        : 0}
+                      %
                     </CircularProgressLabel>
                   </CircularProgress>
                   <Text mt={2} color="#cbd5f5">

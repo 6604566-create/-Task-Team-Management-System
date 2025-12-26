@@ -9,7 +9,7 @@ import AddTaskModal from "./modals/AddTask";
 import ReadTaskModal from "./modals/ReadTask";
 
 /* API */
-import api from "../../api/axios";
+import fetchClient from "../../api/fetchClient";
 
 /* CHAKRA UI */
 import {
@@ -43,10 +43,10 @@ function Tasks() {
   const fetchTasks = async () => {
     try {
       setLoading(true);
-      const res = await api.get("/tasks"); // ✅ correct
-      setTasks(Array.isArray(res.data) ? res.data : []);
+      const data = await fetchClient("/tasks"); // ✅ FIXED
+      setTasks(Array.isArray(data) ? data : []);
     } catch (err) {
-      console.error("Fetch tasks error:", err);
+      console.error("Fetch tasks error:", err.message);
     } finally {
       setLoading(false);
     }
@@ -60,11 +60,14 @@ function Tasks() {
 
   const handleDeleteTask = async (id) => {
     try {
-      await api.delete(`/tasks/${id}`); // ✅ correct
+      await fetchClient(`/tasks/${id}`, {
+        method: "DELETE",
+      }); // ✅ FIXED
+
       setTasks((prev) => prev.filter((t) => t._id !== id));
       setIsReadTaskOpen(false);
     } catch (err) {
-      console.error("Delete task error:", err);
+      console.error("Delete task error:", err.message);
     }
   };
 
@@ -219,10 +222,7 @@ function Tasks() {
                     color="green.400"
                   >
                     <CircularProgressLabel color="#fff">
-                      {total
-                        ? Math.round((completed / total) * 100)
-                        : 0}
-                      %
+                      {total ? Math.round((completed / total) * 100) : 0}%
                     </CircularProgressLabel>
                   </CircularProgress>
                   <Text mt={2} color="#cbd5f5">

@@ -21,7 +21,7 @@ import {
   useToast,
 } from "@chakra-ui/react";
 
-import api from "../../../api/axios";
+import fetchClient from "../../../api/fetchClient";
 
 /* ================= CONSTANTS ================= */
 
@@ -71,11 +71,11 @@ function AddTaskModal({ isOpen, onClose }) {
 
   const fetchEmployees = useCallback(async () => {
     try {
-      const res = await api.get("/employees");
-      setEmployees(Array.isArray(res.data) ? res.data : []);
+      const data = await fetchClient("/api/employees");
+      setEmployees(Array.isArray(data) ? data : []);
     } catch (err) {
       toast({
-        title: "Failed to load employees",
+        title: err.message || "Failed to load employees",
         status: "error",
         position: "top",
       });
@@ -84,11 +84,11 @@ function AddTaskModal({ isOpen, onClose }) {
 
   const fetchProjects = useCallback(async () => {
     try {
-      const res = await api.get("/projects");
-      setProjects(Array.isArray(res.data) ? res.data : []);
+      const data = await fetchClient("/api/projects");
+      setProjects(Array.isArray(data) ? data : []);
     } catch (err) {
       toast({
-        title: "Failed to load projects",
+        title: err.message || "Failed to load projects",
         status: "error",
         position: "top",
       });
@@ -113,10 +113,13 @@ function AddTaskModal({ isOpen, onClose }) {
     setLoading(true);
 
     try {
-      const res = await api.post("/task", formData);
+      const data = await fetchClient("/api/task", {
+        method: "POST",
+        body: formData,
+      });
 
       toast({
-        title: res.data?.message || "Task added successfully",
+        title: data?.message || "Task added successfully",
         status: "success",
         position: "top",
         duration: 4000,
@@ -127,7 +130,7 @@ function AddTaskModal({ isOpen, onClose }) {
       onClose();
     } catch (err) {
       toast({
-        title: err.response?.data?.message || "Failed to add task",
+        title: err.message || "Failed to add task",
         status: "error",
         position: "top",
         duration: 4000,
@@ -235,11 +238,11 @@ function AddTaskModal({ isOpen, onClose }) {
           </ModalBody>
 
           <ModalFooter>
-            <Button mr={3} onClick={onClose} disabled={loading}>
+            <Button mr={3} onClick={onClose} isDisabled={loading}>
               Close
             </Button>
 
-            <Button type="submit" colorScheme="teal" disabled={loading}>
+            <Button type="submit" colorScheme="teal" isDisabled={loading}>
               {loading ? <Spinner size="sm" /> : "Add Task"}
             </Button>
           </ModalFooter>

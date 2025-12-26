@@ -25,7 +25,7 @@ const PORT = process.env.PORT || 8000;
     console.log("MongoDB connected");
   } catch (err) {
     console.error("MongoDB connection failed:", err.message);
-    process.exit(1); // ❗ VERY IMPORTANT
+    process.exit(1); // ❗ stop server if DB fails
   }
 })();
 
@@ -43,14 +43,12 @@ app.set("trust proxy", 1);
 app.use(
   cors({
     origin(origin, callback) {
-      // Allow server-to-server or same-origin requests
-      if (!origin) return callback(null, true);
+      if (!origin) return callback(null, true); // allow server-to-server
 
       if (allowedOrigins.includes(origin)) {
         return callback(null, true);
       }
 
-      // ❗ DO NOT throw error → respond gracefully
       return callback(null, false);
     },
     credentials: true,
@@ -71,6 +69,13 @@ app.get("/", (req, res) => {
 });
 
 /* ================= ROUTES ================= */
+/**
+ * IMPORTANT:
+ * Auth routes are mounted at /api/auth
+ * Final endpoints:
+ * POST /api/auth/register
+ * POST /api/auth/login
+ */
 
 app.use("/api", authRoute);
 app.use("/api", dashboardRoute);

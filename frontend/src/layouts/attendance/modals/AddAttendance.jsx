@@ -13,7 +13,7 @@ import {
   useToast,
 } from "@chakra-ui/react";
 
-import api from "../../../api/axios";
+import fetchClient from "../../../api/fetchClient";
 
 /* ================= COMPONENT ================= */
 
@@ -32,11 +32,11 @@ export default function AddAttendanceModal({ isOpen, onClose }) {
   const fetchEmployees = useCallback(async () => {
     setLoadingEmployees(true);
     try {
-      const res = await api.get("/employees");
-      setEmployees(res.data || []);
+      const data = await fetchClient("/api/employees");
+      setEmployees(data || []);
     } catch (error) {
       toast({
-        title: "Failed to load employees",
+        title: error.message || "Failed to load employees",
         status: "error",
         position: "top",
         duration: 4000,
@@ -59,8 +59,7 @@ export default function AddAttendanceModal({ isOpen, onClose }) {
   /* ================= DATE & TIME HELPERS ================= */
 
   const getCurrentDate = () => {
-    const d = new Date();
-    return `${d.getDate()}-${d.getMonth() + 1}-${d.getFullYear()}`;
+    return new Date().toISOString().split("T")[0]; // YYYY-MM-DD
   };
 
   const getCurrentTime = () => {
@@ -78,11 +77,14 @@ export default function AddAttendanceModal({ isOpen, onClose }) {
     setLoading(true);
 
     try {
-      await api.post("/attendance", {
-        employeeId,
-        day: getCurrentDate(),
-        timeIn: attendanceType === "time_in" ? getCurrentTime() : null,
-        timeOut: attendanceType === "time_out" ? getCurrentTime() : null,
+      await fetchClient("/api/attendance", {
+        method: "POST",
+        body: {
+          employeeId,
+          day: getCurrentDate(),
+          timeIn: attendanceType === "time_in" ? getCurrentTime() : null,
+          timeOut: attendanceType === "time_out" ? getCurrentTime() : null,
+        },
       });
 
       toast({
@@ -96,8 +98,7 @@ export default function AddAttendanceModal({ isOpen, onClose }) {
       onClose();
     } catch (error) {
       toast({
-        title:
-          error.response?.data?.message || "Failed to mark attendance",
+        title: error.message || "Failed to mark attendance",
         status: "error",
         position: "top",
         duration: 4000,

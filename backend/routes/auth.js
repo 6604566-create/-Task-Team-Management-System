@@ -10,7 +10,6 @@ router.post("/register", async (req, res) => {
   try {
     const { firstName, lastName, email, password } = req.body;
 
-    // ✅ Validation
     if (!firstName || !lastName || !email || !password) {
       return res.status(400).json({
         message: "All fields are required",
@@ -33,12 +32,12 @@ router.post("/register", async (req, res) => {
       password: hashedPassword,
     });
 
-    res.status(201).json({
+    return res.status(201).json({
       message: "User registered successfully",
     });
   } catch (error) {
     console.error("Register error:", error);
-    res.status(500).json({
+    return res.status(500).json({
       message: "Registration failed",
     });
   }
@@ -49,7 +48,6 @@ router.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    // ✅ Validation
     if (!email || !password) {
       return res.status(400).json({
         message: "Email and password are required",
@@ -70,7 +68,6 @@ router.post("/login", async (req, res) => {
       });
     }
 
-    // ✅ Safety check
     if (!process.env.JWT_SECRET_KEY) {
       throw new Error("JWT_SECRET_KEY not defined");
     }
@@ -81,7 +78,7 @@ router.post("/login", async (req, res) => {
       { expiresIn: "1h" }
     );
 
-    res.status(200).json({
+    return res.status(200).json({
       token,
       user: {
         id: user._id,
@@ -92,7 +89,7 @@ router.post("/login", async (req, res) => {
     });
   } catch (error) {
     console.error("Login error:", error);
-    res.status(500).json({
+    return res.status(500).json({
       message: "Login failed",
     });
   }

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import api from "../../api/axios";
+import fetchClient from "../../api/fetchClient";
 
 import Navbar from "../../components/navbar/Navbar";
 import Sidenav from "../../components/sidenav/Sidenav";
@@ -25,13 +25,15 @@ function Dashboard() {
   useEffect(() => {
     const fetchDashboard = async () => {
       try {
-        const res = await api.get("/dashboard"); // ✅ correct endpoint
-        setData(res.data);
+        // ✅ fetchClient usage
+        const dashboardData = await fetchClient("/api/dashboard");
+        setData(dashboardData);
       } catch (err) {
-        if (err.response?.status === 401) {
-          localStorage.removeItem("token");
-          navigate("/", { replace: true });
-        }
+        console.error("Dashboard fetch error:", err.message);
+
+        // Any auth error → logout
+        localStorage.removeItem("token");
+        navigate("/", { replace: true });
       } finally {
         setLoading(false);
       }

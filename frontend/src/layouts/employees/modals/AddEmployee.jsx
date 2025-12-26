@@ -14,13 +14,15 @@ import {
   useToast,
 } from "@chakra-ui/react";
 
-import api from "../../../api/axios";
+import fetchClient from "../../../api/fetchClient";
+
+/* ================= COMPONENT ================= */
 
 function AddEmployeeModal({ isOpen, onClose }) {
   const toast = useToast();
   const [loading, setLoading] = useState(false);
 
-  const [formData, setFormData] = useState({
+  const initialState = {
     firstName: "",
     lastName: "",
     email: "",
@@ -32,7 +34,9 @@ function AddEmployeeModal({ isOpen, onClose }) {
     startDate: "",
     status: "Active",
     gender: "Male",
-  });
+  };
+
+  const [formData, setFormData] = useState(initialState);
 
   /* ================= INPUT HANDLERS ================= */
 
@@ -55,34 +59,25 @@ function AddEmployeeModal({ isOpen, onClose }) {
     setLoading(true);
 
     try {
-      const res = await api.post("/employee", formData);
+      // ✅ fetchClient usage (NOT axios)
+      const data = await fetchClient("/api/employee", {
+        method: "POST",
+        body: formData,
+      });
 
       toast({
-        title: res.data.message || "Employee added successfully",
+        title: data?.message || "Employee added successfully",
         status: "success",
         position: "top",
         duration: 4000,
         isClosable: true,
       });
 
-      setFormData({
-        firstName: "",
-        lastName: "",
-        email: "",
-        phone: "",
-        residentialAddress: "",
-        cnic: "",
-        role: "",
-        dateOfBirth: "",
-        startDate: "",
-        status: "Active",
-        gender: "Male",
-      });
-
+      setFormData(initialState);
       onClose();
     } catch (error) {
       toast({
-        title: error.response?.data?.message || "Failed to add employee",
+        title: error.message || "Failed to add employee",
         status: "error",
         position: "top",
         duration: 4000,
@@ -92,6 +87,8 @@ function AddEmployeeModal({ isOpen, onClose }) {
       setLoading(false);
     }
   };
+
+  /* ================= UI ================= */
 
   return (
     <Modal
@@ -111,7 +108,7 @@ function AddEmployeeModal({ isOpen, onClose }) {
             <Input mt={3} name="firstName" placeholder="First Name" value={formData.firstName} onChange={handleChange} required />
             <Input mt={3} name="lastName" placeholder="Last Name" value={formData.lastName} onChange={handleChange} required />
             <Input mt={3} type="email" name="email" placeholder="Email" value={formData.email} onChange={handleChange} required />
-            <Input mt={3} type="text" name="phone" placeholder="Phone" value={formData.phone} onChange={handleChange} required />
+            <Input mt={3} name="phone" placeholder="Phone" value={formData.phone} onChange={handleChange} required />
             <Input mt={3} name="residentialAddress" placeholder="Residential Address" value={formData.residentialAddress} onChange={handleChange} required />
             <Input mt={3} name="cnic" placeholder="CNIC" value={formData.cnic} onChange={handleChange} required />
             <Input mt={3} name="role" placeholder="Role" value={formData.role} onChange={handleChange} required />

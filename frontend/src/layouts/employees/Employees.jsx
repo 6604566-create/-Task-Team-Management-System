@@ -20,7 +20,7 @@ import { IoMdAdd } from "react-icons/io";
 import { FcStatistics } from "react-icons/fc";
 
 import AddEmployeeModal from "./modals/AddEmployee";
-import api from "../../api/axios";
+import fetchClient from "../../api/fetchClient";
 
 /* ================= STYLES ================= */
 
@@ -31,17 +31,8 @@ const styles = {
     display: "flex",
     fontFamily: "Inter, sans-serif",
   },
-
-  sidebar: {
-    width: "240px",
-  },
-
-  content: {
-    flex: 1,
-    padding: "30px",
-    color: "#fff",
-  },
-
+  sidebar: { width: "240px" },
+  content: { flex: 1, padding: "30px", color: "#fff" },
   glassCard: {
     background: "rgba(255,255,255,0.12)",
     backdropFilter: "blur(18px)",
@@ -50,7 +41,6 @@ const styles = {
     marginBottom: "24px",
     boxShadow: "0 30px 60px rgba(0,0,0,0.45)",
   },
-
   headerRow: {
     display: "flex",
     alignItems: "center",
@@ -60,38 +50,24 @@ const styles = {
     fontSize: "15px",
     color: "#f472b6",
   },
-
   statsGrid: {
     display: "grid",
     gridTemplateColumns: "repeat(4, 1fr)",
     gap: "16px",
   },
-
   statBox: {
     padding: "18px",
     borderRadius: "16px",
     background: "rgba(255,255,255,0.15)",
-    backdropFilter: "blur(12px)",
   },
-
-  statLabel: {
-    fontSize: "13px",
-    color: "#cbd5f5",
-  },
-
-  statValue: {
-    fontSize: "26px",
-    fontWeight: 700,
-    marginTop: "6px",
-  },
-
+  statLabel: { fontSize: "13px", color: "#cbd5f5" },
+  statValue: { fontSize: "26px", fontWeight: 700, marginTop: "6px" },
   tableHeader: {
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
     marginBottom: "16px",
   },
-
   addBtn: {
     display: "flex",
     alignItems: "center",
@@ -105,17 +81,13 @@ const styles = {
     fontSize: "14px",
     fontWeight: 600,
   },
-
   emptyState: {
     padding: "50px",
     textAlign: "center",
     color: "#cbd5f5",
     fontSize: "15px",
   },
-
-  tableText: {
-    color: "#fff",
-  },
+  tableText: { color: "#fff" },
 };
 
 /* ================= COMPONENT ================= */
@@ -139,13 +111,12 @@ function Employees() {
   const getEmployees = useCallback(async () => {
     try {
       setLoading(true);
-      const res = await api.get("/employees"); // ✅ FIXED
-      setEmployeesData(Array.isArray(res.data) ? res.data : []);
+      const data = await fetchClient("/api/employees");
+      setEmployeesData(Array.isArray(data) ? data : []);
     } catch (err) {
-      if (err.response?.status === 401) {
-        localStorage.removeItem("token");
-        navigate("/", { replace: true });
-      }
+      console.error("Employees fetch error:", err.message);
+      localStorage.removeItem("token");
+      navigate("/", { replace: true });
     } finally {
       setLoading(false);
     }
@@ -155,13 +126,12 @@ function Employees() {
 
   const getEmployeesStats = useCallback(async () => {
     try {
-      const res = await api.get("/employees-stats");
-      setEmployeesStats(res.data);
+      const stats = await fetchClient("/api/employees-stats");
+      setEmployeesStats(stats);
     } catch (err) {
-      if (err.response?.status === 401) {
-        localStorage.removeItem("token");
-        navigate("/", { replace: true });
-      }
+      console.error("Employees stats error:", err.message);
+      localStorage.removeItem("token");
+      navigate("/", { replace: true });
     }
   }, [navigate]);
 
@@ -204,17 +174,14 @@ function Employees() {
                 <div style={styles.statLabel}>Total</div>
                 <div style={styles.statValue}>{employeesStats.totalEmployees}</div>
               </div>
-
               <div style={styles.statBox}>
                 <div style={styles.statLabel}>Active</div>
                 <div style={styles.statValue}>{employeesStats.activeEmployees}</div>
               </div>
-
               <div style={styles.statBox}>
                 <div style={styles.statLabel}>Inactive</div>
                 <div style={styles.statValue}>{employeesStats.inActiveEmployees}</div>
               </div>
-
               <div style={styles.statBox}>
                 <div style={styles.statLabel}>Terminated</div>
                 <div style={styles.statValue}>{employeesStats.terminatedEmployees}</div>
@@ -258,7 +225,7 @@ function Employees() {
                     <Tr>
                       <Td colSpan={6}>
                         <div style={styles.emptyState}>
-                          👥 No employees yet  
+                          👥 No employees yet
                           <br />
                           Click <b>Add Employee</b> to get started
                         </div>

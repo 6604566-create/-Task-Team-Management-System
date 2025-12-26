@@ -16,7 +16,7 @@ import { FcStatistics } from "react-icons/fc";
 
 import AddProjectModal from "./modals/AddProject";
 import ReadProjectModal from "./modals/ReadProject";
-import api from "../../api/axios";
+import fetchClient from "../../api/fetchClient";
 
 /* ================= STYLES ================= */
 
@@ -27,14 +27,8 @@ const styles = {
     display: "flex",
     fontFamily: "Inter, sans-serif",
   },
-
   sidebar: { width: "240px" },
-
-  content: {
-    flex: 1,
-    padding: "30px",
-    color: "#fff",
-  },
+  content: { flex: 1, padding: "30px", color: "#fff" },
 
   glassCard: {
     background: "rgba(255,255,255,0.12)",
@@ -71,11 +65,7 @@ const styles = {
   statValue: { fontSize: "26px", fontWeight: 700 },
   statLabel: { fontSize: "13px", color: "#cbd5f5" },
 
-  grid: {
-    display: "grid",
-    gridTemplateColumns: "2fr 1fr",
-    gap: "24px",
-  },
+  grid: { display: "grid", gridTemplateColumns: "2fr 1fr", gap: "24px" },
 
   addBtn: {
     display: "flex",
@@ -112,11 +102,7 @@ const styles = {
     margin: "8px 0 14px",
   },
 
-  dateText: {
-    fontSize: "12px",
-    color: "#94a3b8",
-    marginTop: "10px",
-  },
+  dateText: { fontSize: "12px", color: "#94a3b8", marginTop: "10px" },
 
   progressCard: {
     background: "rgba(255,255,255,0.15)",
@@ -125,11 +111,7 @@ const styles = {
     textAlign: "center",
   },
 
-  empty: {
-    padding: "40px",
-    textAlign: "center",
-    color: "#cbd5f5",
-  },
+  empty: { padding: "40px", textAlign: "center", color: "#cbd5f5" },
 };
 
 /* ================= COMPONENT ================= */
@@ -147,9 +129,10 @@ function Projects() {
 
   const fetchProjects = useCallback(async () => {
     try {
-      const res = await api.get("/projects"); // ✅ CORRECT
-      setProjects(Array.isArray(res.data) ? res.data : []);
+      const data = await fetchClient("/api/projects");
+      setProjects(Array.isArray(data) ? data : []);
     } catch (err) {
+      console.error("Projects fetch error:", err.message);
       localStorage.removeItem("token");
       navigate("/", { replace: true });
     }
@@ -163,10 +146,10 @@ function Projects() {
 
   const handleDeleteProject = async (id) => {
     try {
-      await api.delete(`/projects/${id}`); // ✅ CORRECT
+      await fetchClient(`/api/projects/${id}`, { method: "DELETE" });
       setProjects((prev) => prev.filter((p) => p._id !== id));
     } catch (err) {
-      console.error("Delete project error:", err);
+      console.error("Delete project error:", err.message);
     }
   };
 

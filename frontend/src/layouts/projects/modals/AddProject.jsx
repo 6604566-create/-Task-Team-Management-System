@@ -15,20 +15,26 @@ import {
   useToast,
 } from "@chakra-ui/react";
 
-import api from "../../../api/axios";
+import fetchClient from "../../../api/fetchClient";
+
+/* ================= COMPONENT ================= */
 
 function AddProjectModal({ isOpen, onClose }) {
   const toast = useToast();
   const [loading, setLoading] = useState(false);
 
-  const [formData, setFormData] = useState({
+  const initialState = {
     title: "",
     description: "",
     clientName: "",
     startDate: "",
     status: "On Hold",
     priority: "Most Important",
-  });
+  };
+
+  const [formData, setFormData] = useState(initialState);
+
+  /* ================= HANDLERS ================= */
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -42,34 +48,32 @@ function AddProjectModal({ isOpen, onClose }) {
     setFormData({ ...formData, priority });
   };
 
+  /* ================= SUBMIT ================= */
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
 
     try {
-      const res = await api.post("/project", formData);
+      // ✅ fetchClient usage
+      const data = await fetchClient("/api/project", {
+        method: "POST",
+        body: formData,
+      });
 
       toast({
-        title: res.data.message || "Project added successfully",
+        title: data?.message || "Project added successfully",
         status: "success",
         position: "top",
         duration: 4000,
         isClosable: true,
       });
 
-      setFormData({
-        title: "",
-        description: "",
-        clientName: "",
-        startDate: "",
-        status: "On Hold",
-        priority: "Most Important",
-      });
-
+      setFormData(initialState);
       onClose();
     } catch (error) {
       toast({
-        title: error.response?.data?.message || "Failed to add project",
+        title: error.message || "Failed to add project",
         status: "error",
         position: "top",
         duration: 4000,
@@ -79,6 +83,8 @@ function AddProjectModal({ isOpen, onClose }) {
       setLoading(false);
     }
   };
+
+  /* ================= UI ================= */
 
   return (
     <Modal
@@ -180,11 +186,7 @@ function AddProjectModal({ isOpen, onClose }) {
               Close
             </Button>
 
-            <Button
-              type="submit"
-              colorScheme="teal"
-              isDisabled={loading}
-            >
+            <Button type="submit" colorScheme="teal" isDisabled={loading}>
               {loading ? <Spinner size="sm" /> : "Add Project"}
             </Button>
           </ModalFooter>

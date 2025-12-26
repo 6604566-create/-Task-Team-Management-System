@@ -14,9 +14,9 @@ import {
   Spinner,
 } from "@chakra-ui/react";
 
+import fetchClient from "../../api/fetchClient";
 import { IoMdAdd } from "react-icons/io";
 import AddAttendanceModal from "./modals/AddAttendance";
-import api from "../../api/axios";
 
 /* ================= COMPONENT ================= */
 
@@ -31,10 +31,13 @@ function Attendance() {
   const fetchAttendance = async () => {
     try {
       setLoading(true);
-      const res = await api.get("/attendance"); // ✅ FIXED
-      setAttendanceData(Array.isArray(res.data) ? res.data : []);
+
+      // ✅ fetchClient usage (NOT axios)
+      const data = await fetchClient("/api/attendance");
+
+      setAttendanceData(Array.isArray(data) ? data : []);
     } catch (err) {
-      console.error("Attendance fetch error:", err);
+      console.error("Attendance fetch error:", err.message);
     } finally {
       setLoading(false);
     }

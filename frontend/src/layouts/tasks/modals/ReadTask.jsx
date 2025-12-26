@@ -10,19 +10,34 @@ import {
   Button,
   Tag,
   Text,
+  IconButton,
 } from "@chakra-ui/react";
 import { MdDelete } from "react-icons/md";
+
+/* ================= COMPONENT ================= */
 
 function ReadTaskModal({ isOpen, onClose, task, onDelete }) {
   const handleDelete = () => {
     if (!task || !onDelete) return;
 
-    const confirm = window.confirm("Are you sure you want to delete this task?");
-    if (confirm) {
+    const confirmDelete = window.confirm(
+      "Are you sure you want to delete this task?"
+    );
+
+    if (confirmDelete) {
       onDelete(task._id);
       onClose();
     }
   };
+
+  const priorityColor =
+    task?.priority === "Most Important"
+      ? "red"
+      : task?.priority === "Important"
+      ? "yellow"
+      : task?.priority === "Least Important"
+      ? "green"
+      : "gray";
 
   return (
     <Modal
@@ -43,7 +58,13 @@ function ReadTaskModal({ isOpen, onClose, task, onDelete }) {
               No task selected
             </Text>
           ) : (
-            <div className="task-card-container">
+            <div
+              style={{
+                background: "rgba(255,255,255,0.08)",
+                borderRadius: "16px",
+                padding: "20px",
+              }}
+            >
               {/* TITLE */}
               <Text fontSize="lg" fontWeight="bold" mb={2}>
                 {task.title}
@@ -51,7 +72,7 @@ function ReadTaskModal({ isOpen, onClose, task, onDelete }) {
 
               {/* DESCRIPTION */}
               <Text mb={4} color="gray.600">
-                {task.description}
+                {task.description || "No description provided"}
               </Text>
 
               {/* FOOTER */}
@@ -66,23 +87,16 @@ function ReadTaskModal({ isOpen, onClose, task, onDelete }) {
                 <Tag
                   size="lg"
                   borderRadius="full"
-                  colorScheme={
-                    task.priority === "Most Important"
-                      ? "red"
-                      : task.priority === "Important"
-                      ? "yellow"
-                      : "green"
-                  }
+                  colorScheme={priorityColor}
                 >
-                  {task.priority}
+                  {task.priority || "N/A"}
                 </Tag>
 
-                <MdDelete
-                  style={{
-                    cursor: "pointer",
-                    fontSize: "22px",
-                    color: "#e53e3e",
-                  }}
+                <IconButton
+                  icon={<MdDelete />}
+                  colorScheme="red"
+                  variant="ghost"
+                  aria-label="Delete task"
                   onClick={handleDelete}
                 />
               </div>

@@ -16,7 +16,9 @@ import {
   useToast,
 } from "@chakra-ui/react";
 
-import api from "../../../api/axios";
+import fetchClient from "../../../api/fetchClient";
+
+/* ================= COMPONENT ================= */
 
 function AddTimesheetModal({ isOpen, onClose }) {
   const toast = useToast();
@@ -32,12 +34,13 @@ function AddTimesheetModal({ isOpen, onClose }) {
     project: "",
     task: "",
     progress: 0,
-    timeSpent: 0, // ✅ FIXED
+    timeSpent: 0,
     workDate: "",
     type: "Development",
   });
 
   /* ================= HANDLERS ================= */
+
   const handleChange = (e) => {
     const { name, value } = e.target;
 
@@ -55,20 +58,39 @@ function AddTimesheetModal({ isOpen, onClose }) {
   };
 
   /* ================= FETCH DATA ================= */
+
   useEffect(() => {
     if (!isOpen) return;
 
-    api.get("/employees").then((res) => setEmployeesData(res.data));
-    api.get("/projects").then((res) => setProjectsData(res.data));
-    api.get("/tasks").then((res) => setTasksData(res.data));
-  }, [isOpen]);
+    const loadData = async () => {
+      try {
+        const [employees, projects, tasks] = await Promise.all([
+          fetchClient("/employees"),
+          fetchClient("/projects"),
+          fetchClient("/tasks"),
+        ]);
+
+        setEmployeesData(Array.isArray(employees) ? employees : []);
+        setProjectsData(Array.isArray(projects) ? projects : []);
+        setTasksData(Array.isArray(tasks) ? tasks : []);
+      } catch (err) {
+        toast({
+          title: "Failed to load form data",
+          status: "error",
+          position: "top",
+        });
+      }
+    };
+
+    loadData();
+  }, [isOpen, toast]);
 
   /* ================= SUBMIT ================= */
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const { employee, project, task, workDate, timeSpent, notes, type } =
-      formData;
+    const { employee, project, task, workDate, timeSpent } = formData;
 
     if (!employee || !project || !task || !workDate || !timeSpent) {
       toast({
@@ -82,21 +104,27 @@ function AddTimesheetModal({ isOpen, onClose }) {
     setLoading(true);
 
     try {
-      const payload = {
-        employee,
-        project,
-        task,
-        workDate,
-        timeSpent: Number(timeSpent),
-        notes,
-        type,
-      };
-
-      await api.post("/timesheet", payload);
-
-      await api.patch(`/task/${task}/progress`, {
-        progress: Number(formData.progress),
+      // ✅ Create timesheet
+      await fetchClient("/timesheet", {
+        method: "POST",
+        body: {
+          employee: formData.employee,
+          project: formData.project,
+          task: formData.task,
+          workDate: formData.workDate,
+          timeSpent: Number(formData.timeSpent),
+          notes: formData.notes,
+          type: formData.type,
+        },
       });
+
+      // ✅ Update task progress
+      if (formData.progress > 0) {
+        await fetchClient(`/task/${formData.task}/progress`, {
+          method: "PATCH",
+          body: { progress: Number(formData.progress) },
+        });
+      }
 
       toast({
         title: "Timesheet added successfully",
@@ -118,9 +146,7 @@ function AddTimesheetModal({ isOpen, onClose }) {
       onClose();
     } catch (err) {
       toast({
-        title:
-          err.response?.data?.message ||
-          "Invalid data sent to server (400 Bad Request)",
+        title: err.message || "Failed to add timesheet",
         status: "error",
         position: "top",
       });
@@ -130,9 +156,12 @@ function AddTimesheetModal({ isOpen, onClose }) {
   };
 
   /* ================= FILTER TASKS ================= */
+
   const filteredTasks = tasksData.filter(
     (t) => t.project?._id === formData.project
   );
+
+  /* ================= UI ================= */
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} size="xl" isCentered>
@@ -204,6 +233,8 @@ function AddTimesheetModal({ isOpen, onClose }) {
               placeholder="Progress (%)"
               value={formData.progress}
               onChange={handleChange}
+              min={0}
+              max={100}
             />
 
             <Input
@@ -214,6 +245,7 @@ function AddTimesheetModal({ isOpen, onClose }) {
               value={formData.timeSpent}
               onChange={handleChange}
               required
+              min={0}
             />
 
             <Input
@@ -242,11 +274,11 @@ function AddTimesheetModal({ isOpen, onClose }) {
           </ModalBody>
 
           <ModalFooter>
-            <Button mr={3} onClick={onClose}>
+            <Button mr={3} onClick={onClose} disabled={loading}>
               Close
             </Button>
-            <Button type="submit" colorScheme="teal">
-              {loading ? <Spinner /> : "Add Timesheet"}
+            <Button type="submit" colorScheme="teal" disabled={loading}>
+              {loading ? <Spinner size="sm" /> : "Add Timesheet"}
             </Button>
           </ModalFooter>
         </form>
