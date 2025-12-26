@@ -1,8 +1,10 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import axios from '../../api/axios.js'
+import api from "../../api/axios";
 
 import girlImg from "../../assets/sigin/signup.png";
+
+/* ================= COMPONENT ================= */
 
 export default function Register() {
   const navigate = useNavigate();
@@ -15,15 +17,24 @@ export default function Register() {
     password: "",
   });
 
-  const handleChange = (e) =>
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+  /* ================= HANDLERS ================= */
+
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
 
     try {
-      await axios.post("/register", formData);
+      // ✅ CORRECT API ROUTE (matches backend)
+      await api.post("/register", formData);
+
+      // ✅ Redirect to login page
       navigate("/", { replace: true });
     } catch (err) {
       alert(err.response?.data?.message || "Registration failed");
@@ -31,6 +42,8 @@ export default function Register() {
       setLoading(false);
     }
   };
+
+  /* ================= UI ================= */
 
   return (
     <div style={styles.page}>
@@ -75,8 +88,7 @@ export default function Register() {
               required
             />
 
-          
-
+            <label style={styles.label}>Password</label>
             <input
               style={styles.input}
               type="password"
@@ -87,8 +99,11 @@ export default function Register() {
               required
             />
 
-            {/* ✅ BUTTON FIXED */}
-            <button style={styles.submitBtn} disabled={loading}>
+            <button
+              type="submit"
+              style={styles.submitBtn}
+              disabled={loading}
+            >
               {loading ? "Creating..." : "SIGN UP →"}
             </button>
 
@@ -122,22 +137,21 @@ const styles = {
     fontFamily: "Inter, sans-serif",
   },
 
-card: {
-  width: "1250px",
-  minHeight: "20px",   // ✅ FIXED
-  background: "#fff",
-  borderRadius: "34px",
-  display: "flex",
-  overflow: "hidden",
-},
+  card: {
+    width: "1250px",
+    background: "#fff",
+    borderRadius: "34px",
+    display: "flex",
+    overflow: "hidden",
+  },
 
-left: {
-  width: "55%",
-  padding: "30px",
-  overflowY: "auto",    // ✅ FIXED
-},
+  left: {
+    width: "55%",
+    padding: "30px",
+    overflowY: "auto",
+  },
 
-logo: {
+  logo: {
     color: "#e07a9a",
     fontWeight: 900,
     fontSize: "29px",
@@ -176,20 +190,6 @@ logo: {
     outline: "none",
   },
 
-  passwordRow: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-
-  inlineLink: {
-    color: "#e07a9a",
-    fontWeight: 600,
-    fontSize: "14px",
-    textDecoration: "none",
-  },
-
-  /* ✅ BUTTON NOW VISIBLE */
   submitBtn: {
     marginTop: "20px",
     width: "220px",
