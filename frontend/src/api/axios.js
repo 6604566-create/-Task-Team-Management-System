@@ -3,15 +3,14 @@ import axios from "axios";
 /**
  * BASE URL RULE:
  * - Local → http://localhost:8000
- * - Production → VITE_API_URL (no /api here)
+ * - Production → REACT_APP_API_URL (no /api here)
+ * Note: This project uses CRA env vars (process.env.REACT_APP_*).
  */
 
+const apiBase = process.env.REACT_APP_API_URL || "http://localhost:8000";
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL
-    ? `${import.meta.env.VITE_API_URL}/api`
-    : "http://localhost:8000/api",
-
-  withCredentials: true, // ✅ REQUIRED FOR CORS
+  baseURL: `${apiBase}/api`,
+  withCredentials: false, // using token in Authorization header; cookies not required
 });
 
 /* ================= REQUEST INTERCEPTOR ================= */
