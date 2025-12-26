@@ -1,4 +1,9 @@
-import React, { useState, useEffect } from "react";
+import React, {
+  useState,
+  useEffect,
+  useCallback,
+  useMemo,
+} from "react";
 import {
   Modal,
   ModalOverlay,
@@ -35,28 +40,36 @@ function AddTaskModal({ isOpen, onClose }) {
   const [employees, setEmployees] = useState([]);
   const [projects, setProjects] = useState([]);
 
-  const initialState = {
-    title: "",
-    description: "",
-    assignTo: "",
-    project: "",
-    startDate: "",
-    priority: "Most Important",
-  };
+  /* ================= INITIAL STATE ================= */
+
+  const initialState = useMemo(
+    () => ({
+      title: "",
+      description: "",
+      assignTo: "",
+      project: "",
+      startDate: "",
+      priority: "Most Important",
+    }),
+    []
+  );
 
   const [formData, setFormData] = useState(initialState);
 
   /* ================= HANDLERS ================= */
 
-  const handleChange = (e) =>
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
 
-  const handlePriorityClick = (priority) =>
-    setFormData({ ...formData, priority });
+  const handlePriorityClick = (priority) => {
+    setFormData((prev) => ({ ...prev, priority }));
+  };
 
   /* ================= FETCH DATA ================= */
 
-  const fetchEmployees = async () => {
+  const fetchEmployees = useCallback(async () => {
     try {
       const res = await api.get("/employees");
       setEmployees(Array.isArray(res.data) ? res.data : []);
@@ -67,9 +80,9 @@ function AddTaskModal({ isOpen, onClose }) {
         position: "top",
       });
     }
-  };
+  }, [toast]);
 
-  const fetchProjects = async () => {
+  const fetchProjects = useCallback(async () => {
     try {
       const res = await api.get("/projects");
       setProjects(Array.isArray(res.data) ? res.data : []);
@@ -80,7 +93,9 @@ function AddTaskModal({ isOpen, onClose }) {
         position: "top",
       });
     }
-  };
+  }, [toast]);
+
+  /* ================= EFFECT ================= */
 
   useEffect(() => {
     if (isOpen) {
@@ -89,7 +104,7 @@ function AddTaskModal({ isOpen, onClose }) {
     } else {
       setFormData(initialState);
     }
-  }, [isOpen]);
+  }, [isOpen, fetchEmployees, fetchProjects, initialState]);
 
   /* ================= SUBMIT ================= */
 

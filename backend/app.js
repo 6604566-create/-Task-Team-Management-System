@@ -19,10 +19,18 @@ const app = express();
 const PORT = process.env.PORT || 8000;
 
 /* ================= DATABASE ================= */
-connectDB();
+(async () => {
+  try {
+    await connectDB();
+    console.log("MongoDB connected");
+  } catch (err) {
+    console.error("MongoDB connection failed:", err.message);
+    process.exit(1); // ❗ VERY IMPORTANT
+  }
+})();
 
 /* ================= MIDDLEWARE ================= */
-// CORS configuration for local dev (CRA at :3000 or Vite at :5173) and production (Vercel via env)
+
 const allowedOrigins = [
   "http://localhost:3000",
   "http://localhost:5173",
@@ -35,10 +43,15 @@ app.set("trust proxy", 1);
 app.use(
   cors({
     origin(origin, callback) {
-      // allow non-browser or same-origin requests (no origin)
+      // Allow server-to-server or same-origin requests
       if (!origin) return callback(null, true);
-      if (allowedOrigins.includes(origin)) return callback(null, true);
-      return callback(new Error(`Not allowed by CORS: ${origin}`));
+
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+
+      // ❗ DO NOT throw error → respond gracefully
+      return callback(null, false);
     },
     credentials: true,
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
@@ -46,20 +59,19 @@ app.use(
   })
 );
 
-app.options("*", cors({
-  origin: allowedOrigins,
-  credentials: true,
-})); // ✅ Allow preflight for all routes
+app.options("*", cors());
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 /* ================= HEALTH CHECK ================= */
+
 app.get("/", (req, res) => {
   res.send("API is running 🚀");
 });
 
 /* ================= ROUTES ================= */
+
 app.use("/api", authRoute);
 app.use("/api", dashboardRoute);
 app.use("/api", employeeRoute);
@@ -69,12 +81,20 @@ app.use("/api", timesheetRoute);
 app.use("/api", attendanceRoute);
 
 /* ================= ERROR HANDLER ================= */
+
 app.use((err, req, res, next) => {
   console.error("Global Error:", err);
-  res.status(500).json({ message: "Internal Server Error" });
+
+  res.status(err.status || 500).json({
+    message:
+      process.env.NODE_ENV === "production"
+        ? "Internal Server Error"
+        : err.message || "Internal Server Error",
+  });
 });
 
 /* ================= SERVER ================= */
+
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });

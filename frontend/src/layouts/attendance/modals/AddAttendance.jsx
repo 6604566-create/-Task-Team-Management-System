@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   Modal,
   ModalOverlay,
@@ -29,7 +29,7 @@ export default function AddAttendanceModal({ isOpen, onClose }) {
 
   /* ================= FETCH EMPLOYEES ================= */
 
-  const fetchEmployees = async () => {
+  const fetchEmployees = useCallback(async () => {
     setLoadingEmployees(true);
     try {
       const res = await api.get("/employees");
@@ -45,7 +45,7 @@ export default function AddAttendanceModal({ isOpen, onClose }) {
     } finally {
       setLoadingEmployees(false);
     }
-  };
+  }, [toast]);
 
   useEffect(() => {
     if (isOpen) {
@@ -54,7 +54,7 @@ export default function AddAttendanceModal({ isOpen, onClose }) {
       setEmployeeId("");
       setAttendanceType("");
     }
-  }, [isOpen]);
+  }, [isOpen, fetchEmployees]);
 
   /* ================= DATE & TIME HELPERS ================= */
 
@@ -119,7 +119,6 @@ export default function AddAttendanceModal({ isOpen, onClose }) {
           <ModalCloseButton />
 
           <ModalBody>
-            {/* EMPLOYEE */}
             <Select
               mt={3}
               placeholder={
@@ -139,7 +138,6 @@ export default function AddAttendanceModal({ isOpen, onClose }) {
               ))}
             </Select>
 
-            {/* ATTENDANCE TYPE */}
             <Select
               mt={3}
               placeholder="Attendance Type"
