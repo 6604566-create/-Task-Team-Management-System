@@ -1,38 +1,63 @@
-import jwt from "jsonwebtoken";
+import mongoose from "mongoose";
+import bcrypt from "bcryptjs";
 
+const userSchema = new mongoose.Schema(
+  {
+    firstName: {
+      type: String,
+      required: true,
+      trim: true,
+    },
 
+    lastName: {
+      type: String,
+      required: true,
+      trim: true,
+    },
 
-const authMiddleware = (req, res, next) => {
+    email: {
+      type: String,
+      required: true,
+      unique: true, // ✅ index only once
+      lowercase: true,
+      trim: true,
+    },
+
+    password: {
+      type: String,
+      required: true,
+      minlength: 6,
+      select: false, // 🔐 never send password by default
+    },
+  },
+  {
+    timestamps: true,
+  }
+);
+
+/* ================= PASSWORD HASH ================= */
+
+userSchema.pre("save", async function (next) {
+  // If password not modified, skip hashing
+  if (!this.isModified("password")) return next();
+
   try {
-    // ✅ READ TOKEN FROM COOKIE
-    const token = req.cookies?.token;
-
-    if (!token) {
-      return res.status(401).json({
-        message: "Unauthorized: No token provided",
-      });
-    }
-
-    if (!process.env.JWT_SECRET_KEY) {
-      console.error("JWT_SECRET_KEY not defined");
-      return res.status(500).json({
-        message: "Server configuration error",
-      });
-    }
-
-    // ✅ VERIFY TOKEN
-    const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
-
-    // Attach user id
-    req.user = decoded.userId;
-
+    const salt = await bcrypt.genSalt(10);
+    this.password = await bcrypt.hash(this.password, salt);
     next();
   } catch (error) {
-    console.error("Auth Middleware Error:", error.message);
-    return res.status(401).json({
-      message: "Unauthorized: Invalid or expired token",
-    });
+    next(error);
   }
+});
+
+/* ================= PASSWORD COMPARE ================= */
+
+userSchema.methods.comparePassword = async function (enteredPassword) {
+  return bcrypt.compare(enteredPassword, this.password);
 };
 
-export default authMiddleware;
+/* ================= EXPORT ================= */
+
+const User = mongoose.model("User", userSchema);
+
+export default User;
