@@ -1,5 +1,7 @@
 import jwt from "jsonwebtoken";
 
+
+
 const authMiddleware = (req, res, next) => {
   try {
     // ✅ READ TOKEN FROM COOKIE
@@ -21,7 +23,7 @@ const authMiddleware = (req, res, next) => {
     // ✅ VERIFY TOKEN
     const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
 
-    // attach user id (keep it consistent)
+    // Attach user id
     req.user = decoded.userId;
 
     next();
