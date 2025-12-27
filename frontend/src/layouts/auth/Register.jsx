@@ -8,8 +8,8 @@ import girlImg from "../../assets/sigin/signup.png";
 
 export default function Register() {
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(false);
 
+  const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -20,19 +20,18 @@ export default function Register() {
   /* ================= HANDLERS ================= */
 
   const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (loading) return;
+
     setLoading(true);
 
     try {
-      // ✅ fetchClient usage (NOT axios)
-      await fetchClient("/api/register", {
+      await fetchClient("/api/auth/register", {
         method: "POST",
         body: formData,
       });
@@ -63,6 +62,7 @@ export default function Register() {
               style={styles.input}
               type="text"
               name="firstName"
+              placeholder="Aditya"
               value={formData.firstName}
               onChange={handleChange}
               required
@@ -73,6 +73,7 @@ export default function Register() {
               style={styles.input}
               type="text"
               name="lastName"
+              placeholder="Raj"
               value={formData.lastName}
               onChange={handleChange}
               required
@@ -83,6 +84,7 @@ export default function Register() {
               style={styles.input}
               type="email"
               name="email"
+              placeholder="aditya@gmail.com"
               value={formData.email}
               onChange={handleChange}
               required
@@ -93,6 +95,7 @@ export default function Register() {
               style={styles.input}
               type="password"
               name="password"
+              placeholder="************"
               value={formData.password}
               onChange={handleChange}
               required
@@ -100,7 +103,11 @@ export default function Register() {
 
             <button
               type="submit"
-              style={styles.submitBtn}
+              style={{
+                ...styles.submitBtn,
+                opacity: loading ? 0.7 : 1,
+                cursor: loading ? "not-allowed" : "pointer",
+              }}
               disabled={loading}
             >
               {loading ? "Creating..." : "SIGN UP →"}
@@ -146,8 +153,7 @@ const styles = {
 
   left: {
     width: "55%",
-    padding: "30px",
-    overflowY: "auto",
+    padding: "40px",
   },
 
   logo: {
@@ -199,7 +205,6 @@ const styles = {
     color: "#fff",
     fontSize: "16px",
     fontWeight: 600,
-    cursor: "pointer",
   },
 
   footer: {
@@ -223,6 +228,5 @@ const styles = {
 
   image: {
     width: "90%",
-    animation: "float 6s ease-in-out infinite",
   },
 };

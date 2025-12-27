@@ -9,30 +9,18 @@ import Projects from "./layouts/projects/Projects";
 import Tasks from "./layouts/tasks/Tasks";
 import Timesheets from "./layouts/timesheets/Timesheets";
 import Attendance from "./layouts/attendance/Attendance";
+
 import ProtectedRoute from "./routes/ProtectedRoute";
 
-/* ================= AUTH HELPER ================= */
-
-const isAuthenticated = () => {
-  return !!localStorage.getItem("token");
-};
+/* ================= COMPONENT ================= */
 
 function App() {
   return (
     <Routes>
       {/* ================= PUBLIC ROUTES ================= */}
 
-      <Route
-        path="/"
-        element={
-          isAuthenticated() ? (
-            <Navigate to="/admin/dashboard" replace />
-          ) : (
-            <Login />
-          )
-        }
-      />
-
+      <Route path="/" element={<Login />} />
+      <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
 
       {/* ================= PROTECTED ROUTES ================= */}

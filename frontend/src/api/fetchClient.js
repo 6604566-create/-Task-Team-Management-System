@@ -1,24 +1,26 @@
 const BASE_URL =
   import.meta.env.VITE_API_URL ||
-  process.env.REACT_APP_API_URL ||
-  "http://localhost:8000";
+  "https://task-team-management-system.onrender.com";
 
 const fetchClient = async (endpoint, options = {}) => {
-  const token = localStorage.getItem("token");
-
   const res = await fetch(`${BASE_URL}${endpoint}`, {
     method: options.method || "GET",
     headers: {
       "Content-Type": "application/json",
-      ...(token && { Authorization: `Bearer ${token}` }),
     },
+    credentials: "include", // ✅ REQUIRED for cookie auth
     body: options.body ? JSON.stringify(options.body) : undefined,
   });
 
-  const data = await res.json();
+  let data;
+  try {
+    data = await res.json();
+  } catch {
+    data = {};
+  }
 
   if (!res.ok) {
-    throw new Error(data.message || "API Error");
+    throw new Error(data.message || "Request failed");
   }
 
   return data;

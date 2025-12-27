@@ -1,22 +1,25 @@
 import express from "express";
 import Attendance from "../models/attendances.js";
+import authMiddleware from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
 /* ================= HELPERS ================= */
 
+// Convert "10:30 AM" → "10:30"
 function convertTo24Hour(time12h) {
+  if (!time12h) return null;
+
   const [time, period] = time12h.split(" ");
   let [hours, minutes] = time.split(":").map(Number);
 
-  if (period === "PM" && hours < 12) hours += 12;
+  if (period === "PM" && hours !== 12) hours += 12;
   if (period === "AM" && hours === 12) hours = 0;
 
-  return `${hours.toString().padStart(2, "0")}:${minutes
-    .toString()
-    .padStart(2, "0")}`;
+  return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`;
 }
 
+// Calculate working hours
 function calculateDuration(timeIn, timeOut) {
   const start = new Date(`1970-01-01T${convertTo24Hour(timeIn)}:00`);
   const end = new Date(`1970-01-01T${convertTo24Hour(timeOut)}:00`);
@@ -31,33 +34,43 @@ function calculateDuration(timeIn, timeOut) {
 }
 
 /* ================= GET ATTENDANCE ================= */
-
-router.get("/attendance", async (req, res) => {
+/* 🔒 Protected */
+router.get("/attendance", authMiddleware, async (req, res) => {
   try {
     const attendances = await Attendance.find()
-      .populate("employee", "firstName lastName")
+      .populate("employee", "firstName lastName email")
       .sort({ createdAt: -1 });
 
-    res.status(200).json(attendances);
+    return res.status(200).json(attendances);
   } catch (error) {
     console.error("Fetch attendance error:", error);
-    res.status(500).json({ message: "Failed to fetch attendance" });
+    return res.status(500).json({ message: "Failed to fetch attendance" });
   }
 });
 
 /* ================= POST ATTENDANCE ================= */
-
-router.post("/attendance", async (req, res) => {
+/* 🔒 Protected */
+router.post("/attendance", authMiddleware, async (req, res) => {
   try {
-    const { employeeId, day, timeIn, timeOut } = req.body;
+    const { employeeId, timeIn, timeOut } = req.body;
 
-    if (!employeeId || !day) {
-      return res.status(400).json({ message: "Employee and day are required" });
+    if (!employeeId) {
+      return res.status(400).json({ message: "Employee is required" });
     }
+
+    if (timeIn && timeOut) {
+      return res.status(400).json({
+        message: "Send either Time In or Time Out, not both",
+      });
+    }
+
+    // ✅ Use real Date (start of day)
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
 
     let attendance = await Attendance.findOne({
       employee: employeeId,
-      day,
+      day: today,
     });
 
     /* ===== TIME IN ===== */
@@ -70,10 +83,8 @@ router.post("/attendance", async (req, res) => {
 
       await Attendance.create({
         employee: employeeId,
-        day,
+        day: today,
         timeIn,
-        timeOut: null,
-        workingHours: null,
       });
 
       return res.status(201).json({
@@ -113,7 +124,7 @@ router.post("/attendance", async (req, res) => {
     });
   } catch (error) {
     console.error("Attendance error:", error);
-    res.status(500).json({ message: "Attendance failed" });
+    return res.status(500).json({ message: "Attendance failed" });
   }
 });
 

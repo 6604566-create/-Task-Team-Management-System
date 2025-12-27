@@ -8,9 +8,9 @@ function ProtectedRoute({ children }) {
   if (!token) {
     return (
       <Navigate
-        to="/login"
+        to="/"
         replace
-        state={{ from: location.pathname }}
+        state={{ from: location }}
       />
     );
   }

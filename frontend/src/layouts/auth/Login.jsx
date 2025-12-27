@@ -8,8 +8,8 @@ import girlImg from "../../assets/sigin/girl.png";
 
 export default function Login() {
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(false);
 
+  const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -18,24 +18,23 @@ export default function Login() {
   /* ================= HANDLERS ================= */
 
   const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (loading) return;
+
     setLoading(true);
 
     try {
-      // ✅ fetchClient usage (FUNCTION, not axios)
-      const data = await fetchClient("/api/login", {
+      const data = await fetchClient("/api/auth/login", {
         method: "POST",
         body: formData,
       });
 
-      // ✅ Save token
+      // ✅ Save JWT
       localStorage.setItem("token", data.token);
 
       // ✅ Redirect
@@ -83,7 +82,11 @@ export default function Login() {
 
             <button
               type="submit"
-              style={styles.loginBtn}
+              style={{
+                ...styles.loginBtn,
+                opacity: loading ? 0.7 : 1,
+                cursor: loading ? "not-allowed" : "pointer",
+              }}
               disabled={loading}
             >
               {loading ? "Logging in..." : "LOGIN →"}
@@ -178,7 +181,6 @@ const styles = {
     color: "#fff",
     fontSize: "16px",
     fontWeight: 600,
-    cursor: "pointer",
   },
 
   footer: {
@@ -202,6 +204,5 @@ const styles = {
 
   image: {
     width: "90%",
-    animation: "float 6s ease-in-out infinite",
   },
 };
